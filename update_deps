@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo -e "\033[1;34mInitiating flutter pub get...\033[0m"
+flutter pub get
+echo -e "\033[1;32mflutter pub get Completed...\033[0m"
+echo -e "\033[1;34mInitiating dart format...\033[0m"
+dart format .
+echo -e "\033[1;32mDart format Completed...\033[0m"
+echo -e "\033[1;34mRegeneration Routes And Auto-Generated Files...\033[0m"
+dart run build_runner build --delete-conflicting-outputs
+echo -e "\033[1;32mRegeneration Routes And Auto-Generated Files Completed...\033[0m"
+echo -e "\033[1;33mupdate_deps completed !!\033[0m"

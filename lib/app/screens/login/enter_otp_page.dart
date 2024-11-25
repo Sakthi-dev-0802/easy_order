@@ -14,7 +14,19 @@ class EnterOtpPage extends StatefulWidget {
 }
 
 class _EnterOtpPageState extends State<EnterOtpPage> {
-  final TextEditingController _otpController = TextEditingController();
+  late final TextEditingController _otpController;
+
+  @override
+  void initState() {
+    super.initState();
+    _otpController = TextEditingController();
+  }
+
+  @override 
+  void dispose() {
+    _otpController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

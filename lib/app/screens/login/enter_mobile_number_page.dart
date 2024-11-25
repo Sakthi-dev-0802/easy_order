@@ -14,6 +14,20 @@ class EnterMobileNumberPage extends StatefulWidget {
 }
 
 class _EnterMobileNumberPageState extends State<EnterMobileNumberPage> {
+  late final TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +75,7 @@ class _EnterMobileNumberPageState extends State<EnterMobileNumberPage> {
                   vertical: spacing20,
                 ),
                 child: TextField(
+                  controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
                   onChanged: (value) {

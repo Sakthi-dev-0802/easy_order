@@ -19,11 +19,15 @@ class _EnterOtpPageState extends State<EnterOtpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
+      appBar: AppBar(
+        backgroundColor: AppColor.backgroundWhite,
+        automaticallyImplyLeading: true,
+      ),
       body: SafeArea(
         child: Center(
           child: Column(
             children: [
-              verticalSpacer(spacing40),
+              verticalSpacer(spacing24),
               Text(
                 'Enter confirmation code',
                 style: AppTextStyle.headingXLargeBlack,
@@ -38,7 +42,7 @@ class _EnterOtpPageState extends State<EnterOtpPage> {
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing16,
                   vertical: spacing24,
-                  ),
+                ),
                 child: Pinput(
                   length: 6,
                   controller: _otpController,

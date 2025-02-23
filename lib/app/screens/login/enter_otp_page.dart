@@ -22,11 +22,12 @@ class _EnterOtpPageState extends State<EnterOtpPage> {
     _otpController = TextEditingController();
   }
 
-  @override 
+  @override
   void dispose() {
     _otpController.dispose();
     super.dispose();
   }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -39,96 +39,9 @@ class _EnterMobileNumberPageState extends State<EnterMobileNumberPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               verticalSpacer(spacing32),
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'Easy Order',
-                      style: AppTextStyle.headingXXLargeBlack,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: spacing30,
-                        horizontal: spacing24,
-                      ),
-                      child: Image.asset(
-                        'assets/images/bg_image.png',
-                        height: MediaQuery.of(context).size.height * 0.4,
-                        width: MediaQuery.of(context).size.width * 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing16),
-                child: Text(
-                  'Please enter your mobile number to get started.',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.titleMediumDark,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing16,
-                  vertical: spacing20,
-                ),
-                child: TextField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  maxLength: 10,
-                  onChanged: (value) {
-                    if (value.length == 10) {
-                      FocusScope.of(context).unfocus();
-                    }
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Enter mobile number',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(radius08),
-                      borderSide: BorderSide(
-                        color: AppColor.textDarkGray,
-                        width: size01,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(radius08),
-                      borderSide: BorderSide(
-                        color: AppColor.textDarkGray,
-                        width: size01,
-                      ),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: spacing16,
-                      vertical: spacing12,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing16),
-                child: GestureDetector(
-                  onTap: () {
-                    //TODO: Login
-                    context.navigateTo(AppRoutes.enterOtpPage);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    height: size48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(radius08),
-                      color: AppColor.buttonGreen,
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Login',
-                        style: AppTextStyle.titleLargeLightWhite,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              _buildAppTitleWithImage(context),
+              ..._buildInputFieldSection(),
+              _buildLoginButton(context),
               verticalSpacer(spacing24),
             ],
           ),
@@ -136,4 +49,101 @@ class _EnterMobileNumberPageState extends State<EnterMobileNumberPage> {
       ),
     );
   }
+
+  Widget _buildAppTitleWithImage(BuildContext context) => Center(
+        child: Column(
+          children: [
+            Text(
+              'Easy Order',
+              style: AppTextStyle.headingXXLargeBlack,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: spacing30,
+                horizontal: spacing24,
+              ),
+              child: Image.asset(
+                'assets/images/bg_image.png',
+                height: MediaQuery.of(context).size.height * 0.4,
+                width: MediaQuery.of(context).size.width * 0.8,
+              ),
+            ),
+          ],
+        ),
+      );
+
+  List<Widget> _buildInputFieldSection() => [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: spacing16),
+          child: Text(
+            'Please enter your mobile number to get started.',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyle.titleMediumDark,
+          ),
+        ),
+        _buildMobileInputField(),
+      ];
+
+  Widget _buildMobileInputField() => Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing16,
+          vertical: spacing20,
+        ),
+        child: TextField(
+          controller: _phoneController,
+          keyboardType: TextInputType.phone,
+          maxLength: 10,
+          onChanged: (value) {
+            if (value.length == 10) {
+              FocusScope.of(context).unfocus();
+            }
+          },
+          decoration: InputDecoration(
+            hintText: 'Enter mobile number',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(radius08),
+              borderSide: BorderSide(
+                color: AppColor.textDarkGray,
+                width: size01,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(radius08),
+              borderSide: BorderSide(
+                color: AppColor.textDarkGray,
+                width: size01,
+              ),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: spacing16,
+              vertical: spacing12,
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildLoginButton(BuildContext context) => Padding(
+        padding: EdgeInsets.symmetric(horizontal: spacing16),
+        child: GestureDetector(
+          onTap: () {
+            //TODO: Login
+            context.navigateTo(AppRoutes.enterOtpPage);
+          },
+          child: Container(
+            width: double.infinity,
+            height: size48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(radius08),
+              color: AppColor.buttonGreen,
+            ),
+            child: Center(
+              child: Text(
+                'Login',
+                style: AppTextStyle.titleLargeLightWhite,
+              ),
+            ),
+          ),
+        ),
+      );
 }

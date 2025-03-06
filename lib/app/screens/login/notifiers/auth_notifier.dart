@@ -1,94 +1,115 @@
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// State class to hold login-related data
 class LoginState {
   final bool isLoading;
   final String? error;
-  final bool isValidNumber;
-  final bool isChecked;
+  final bool isLoggedIn;
+  final User? user;
 
   LoginState({
     this.isLoading = false,
     this.error,
-    this.isValidNumber = false,
-    this.isChecked = false,
+    this.isLoggedIn = false,
+    this.user,
   });
 
   LoginState copyWith({
     bool? isLoading,
     String? error,
-    bool? isValidNumber,
-    bool? isChecked,
+    bool? isLoggedIn,
+    User? user,
   }) {
     return LoginState(
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
-      isValidNumber: isValidNumber ?? this.isValidNumber,
-      isChecked: isChecked ?? this.isChecked,
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+      user: user ?? this.user,
     );
   }
 }
 
-// StateNotifier to manage login state
 class LoginStateNotifier extends StateNotifier<LoginState> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   LoginStateNotifier() : super(LoginState());
 
-  // void setTermsChecked(bool value) => state = state.copyWith(isChecked: value);
-
-  // void validatePhoneNumber(String number) =>
-  //     state = state.copyWith(isValidNumber: number.length == 10);
-
-  Future<void> handleLogin(
+  Future<void> signInWithEmailAndPassword(
     BuildContext context,
-    String phoneNumber,
-    Function(String verificationId) onCodeSent,
-    Function(User? user, String? accessToken) onVerificationCompleted,
-    Function(FirebaseAuthException error) onVerificationFailed,
+    String email,
+    String password,
   ) async {
-    /* if (!state.isValidNumber || !state.isChecked) return;
-
-    state = state.copyWith(isLoading: true, error: null);
-
     try {
-      await AuthServices.instance.verifyPhoneNumber(
-        phoneNumber,
-        onCodeSent: (verificationId) async {
-          await Future.delayed(const Duration(milliseconds: 500));
-          if (context.mounted) {
-            onCodeSent(verificationId);
-            state = state.copyWith(isLoading: false);
-          }
-        },
-        onVerificationCompleted: (user, accessToken) {
-          if (context.mounted) {
-            onVerificationCompleted(user, accessToken);
-            state = state.copyWith(isLoading: false);
-          }
-        },
-        onVerificationFailed: (error) {
-          if (context.mounted) {
-            onVerificationFailed(error);
-            state = state.copyWith(isLoading: false);
-          }
-        },
+      state = state.copyWith(isLoading: true, error: '');
+
+      final UserCredential userCredential = await _auth
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      if (userCredential.user != null) {
+        state = state.copyWith(
+          isLoading: false,
+          isLoggedIn: true,
+          user: userCredential.user,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Wrong password provided.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is invalid.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This user account has been disabled.';
+          break;
+        case 'invalid-credential':
+          errorMessage = 'Invalid email or password.';
+          break;
+        default:
+          errorMessage = 'An error occurred during login: ${e.code}';
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        error: errorMessage,
       );
     } catch (e) {
       state = state.copyWith(
-        error: e.toString(),
         isLoading: false,
+        error: 'An unexpected error occurred.',
       );
-      if (context.mounted) {
-        // context.showToast(message: state.error ?? '');
-      }
-      
-    }*/
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+      state = LoginState();
+    } catch (e) {
+      state = state.copyWith(
+        error: 'Error signing out.',
+      );
+    }
+  }
+
+  Future<void> checkAuthStatus() async {
+    final User? currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      state = state.copyWith(
+        isLoggedIn: true,
+        user: currentUser,
+      );
+    }
   }
 }
 
-// Provider
 final loginStateProvider =
     StateNotifierProvider<LoginStateNotifier, LoginState>((ref) {
   return LoginStateNotifier();

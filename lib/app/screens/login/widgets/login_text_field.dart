@@ -15,7 +15,10 @@ class LoginTextField extends StatelessWidget {
     required this.hintText,
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 20,
+    ),
   });
 
   @override

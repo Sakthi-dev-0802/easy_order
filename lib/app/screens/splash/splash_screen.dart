@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/constants/sizing_constant.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/routes/app_routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 @RoutePage()
@@ -16,11 +17,14 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 1), () {
+    final currentUser = FirebaseAuth.instance.currentUser;
       if (mounted) {
-        context.navigateTo(AppRoutes.loginPage);
+        if (currentUser != null) {
+          context.router.replace(AppRoutes.homePage);
+        } else {
+          context.router.replace(AppRoutes.loginPage);
+        }
       }
-    });
   }
 
   @override

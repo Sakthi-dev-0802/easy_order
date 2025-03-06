@@ -1,7 +1,7 @@
+import 'package:easy_order/app/constants/constants.dart';
+import 'package:easy_order/material_styles/material_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_order/material_styles/material_style.dart';
-import 'package:easy_order/app/constants/constants.dart';
 
 class LoginButton extends ConsumerWidget {
   final VoidCallback onPressed;
@@ -28,10 +28,10 @@ class LoginButton extends ConsumerWidget {
           ),
           child: Center(
             child: isLoading
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
+                ? SizedBox(
+                    height: size24,
+                    width: size24,
+                    child: const CircularProgressIndicator(
                       color: Colors.white,
                       strokeWidth: 2,
                       strokeCap: StrokeCap.round,
@@ -46,4 +46,4 @@ class LoginButton extends ConsumerWidget {
       ),
     );
   }
-} 
+}

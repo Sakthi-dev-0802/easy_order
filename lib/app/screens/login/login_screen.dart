@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/components.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
-import 'package:easy_order/app/screens/login/notifiers/auth_notifier.dart';
+import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
 import 'package:easy_order/app/screens/login/widgets/login_text_field.dart';
 import 'package:easy_order/material_styles/material_style.dart';
@@ -49,7 +49,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             _passwordController.text.trim(),
           );
 
-      final loginState = ref.read(loginStateProvider);
+      final loginState = ref.watch(loginStateProvider);
 
       if (loginState.error != null && loginState.error!.isNotEmpty) {
         if (mounted) {

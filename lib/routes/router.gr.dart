@@ -25,11 +25,9 @@ abstract class $AppRouter extends _i4.RootStackRouter {
       );
     },
     LoginRoute.name: (routeData) {
-      final args = routeData.argsAs<LoginRouteArgs>(
-          orElse: () => const LoginRouteArgs());
       return _i4.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: _i2.LoginPage(key: args.key),
+        child: const _i2.LoginPage(),
       );
     },
     SplashRoute.name: (routeData) {
@@ -57,31 +55,16 @@ class HomeScreen extends _i4.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.LoginPage]
-class LoginRoute extends _i4.PageRouteInfo<LoginRouteArgs> {
-  LoginRoute({
-    dynamic key,
-    List<_i4.PageRouteInfo>? children,
-  }) : super(
+class LoginRoute extends _i4.PageRouteInfo<void> {
+  const LoginRoute({List<_i4.PageRouteInfo>? children})
+      : super(
           LoginRoute.name,
-          args: LoginRouteArgs(key: key),
           initialChildren: children,
         );
 
   static const String name = 'LoginRoute';
 
-  static const _i4.PageInfo<LoginRouteArgs> page =
-      _i4.PageInfo<LoginRouteArgs>(name);
-}
-
-class LoginRouteArgs {
-  const LoginRouteArgs({this.key});
-
-  final dynamic key;
-
-  @override
-  String toString() {
-    return 'LoginRouteArgs{key: $key}';
-  }
+  static const _i4.PageInfo<void> page = _i4.PageInfo<void>(name);
 }
 
 /// generated route for

@@ -2,9 +2,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/components.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
+import 'package:easy_order/app/firebase_services/services/user_service.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
 import 'package:easy_order/app/screens/login/widgets/login_text_field.dart';
+import 'package:easy_order/core/storage/app_storage.dart';
 import 'package:easy_order/material_styles/material_style.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -58,12 +60,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      if (loginState.isLoggedIn && mounted) {
-        context.router.replace(AppRoutes.homePage);
+      if (loginState.isLoggedIn) {
+        await naviagteUser();
       }
     } catch (e) {
       if (mounted) {
         context.showErrorSnackBar('Login failed: ${e.toString()}');
+      }
+    }
+  }
+
+  Future<void> naviagteUser() async {
+    final user = await UserService.getCurrentUser(_emailController.text.trim());
+    if (mounted) {
+      if (user != null) {
+        AppStorage.saveUser(user);
+        ref.read(loginStateProvider.notifier).setUser(user);
+        context.router.replace(AppRoutes.homePage);
+      } else {
+        context.router.navigate(AppRoutes.registerPage);
       }
     }
   }

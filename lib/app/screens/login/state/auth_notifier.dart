@@ -1,3 +1,4 @@
+import 'package:easy_order/app/firebase_services/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +7,7 @@ class LoginState {
   final bool isLoading;
   final String? error;
   final bool isLoggedIn;
-  final User? user;
+  final UserModel? user;
 
   LoginState({
     this.isLoading = false,
@@ -19,7 +20,7 @@ class LoginState {
     bool? isLoading,
     String? error,
     bool? isLoggedIn,
-    User? user,
+    UserModel? user,
   }) {
     return LoginState(
       isLoading: isLoading ?? this.isLoading,
@@ -50,7 +51,6 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
         state = state.copyWith(
           isLoading: false,
           isLoggedIn: true,
-          user: userCredential.user,
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -99,15 +99,17 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
     }
   }
 
-  Future<void> checkAuthStatus() async {
-    final User? currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      state = state.copyWith(
-        isLoggedIn: true,
-        user: currentUser,
-      );
-    }
-  }
+  void setUser(UserModel user) => state = state.copyWith(user: user);
+
+  // Future<void> checkAuthStatus() async {
+  //   final User? currentUser = _auth.currentUser;
+  //   if (currentUser != null) {
+  //     state = state.copyWith(
+  //       isLoggedIn: true,
+  //       user: currentUser,
+  //     );
+  //   }
+  // }
 }
 
 final loginStateProvider =

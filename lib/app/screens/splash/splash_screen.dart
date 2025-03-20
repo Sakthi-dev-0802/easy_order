@@ -1,30 +1,40 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/constants/sizing_constant.dart';
+import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
+import 'package:easy_order/core/storage/app_storage.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/routes/app_routes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @RoutePage()
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   void initState() {
     super.initState();
-    final currentUser = FirebaseAuth.instance.currentUser;
-      if (mounted) {
-        if (currentUser != null) {
-          context.router.replace(AppRoutes.homePage);
-        } else {
-          context.router.replace(AppRoutes.loginPage);
-        }
-      }
+    _checkUserStatus();
+  }
+
+  Future<void> _checkUserStatus() async {
+    final BuildContext currentContext = context;
+
+    final user = await AppStorage.getUser;
+
+    if (!currentContext.mounted) return;
+
+    if (user == null) {
+      currentContext.router.replaceAll([AppRoutes.loginPage]);
+    } else {
+      ref.read(loginStateProvider.notifier).setUser(user);
+      currentContext.router.replaceAll([AppRoutes.homePage]);
+    }
   }
 
   @override

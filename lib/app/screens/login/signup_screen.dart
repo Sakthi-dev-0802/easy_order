@@ -2,50 +2,58 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/components.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
-import 'package:easy_order/app/firebase_services/services/user_service.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
 import 'package:easy_order/app/screens/login/widgets/login_text_field.dart';
-import 'package:easy_order/core/storage/app_storage.dart';
 import 'package:easy_order/material_styles/material_style.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @RoutePage()
-class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+class SignupPage extends ConsumerStatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  ConsumerState<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _SignupPageState extends ConsumerState<SignupPage> {
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
+  late final TextEditingController _confirmPasswordController;
 
   @override
   void initState() {
     super.initState();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      context.showErrorSnackBar('Please enter both email and password');
+  Future<void> _handleSignup() async {
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _confirmPasswordController.text.isEmpty) {
+      context.showErrorSnackBar('Please fill in all fields');
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      context.showErrorSnackBar('Passwords do not match');
       return;
     }
 
     try {
-      await ref.read(loginStateProvider.notifier).signInWithEmailAndPassword(
+      await ref.read(loginStateProvider.notifier).signUpWithEmailAndPassword(
             context,
             _emailController.text.trim(),
             _passwordController.text.trim(),
@@ -61,24 +69,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
 
       if (loginState.isLoggedIn) {
-        await naviagteUser();
+        if (mounted) {
+          context.router.replace(AppRoutes.registerPage);
+        }
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Login failed: ${e.toString()}');
-      }
-    }
-  }
-
-  Future<void> naviagteUser() async {
-    final user = await UserService.getCurrentUser(_emailController.text.trim());
-    if (mounted) {
-      if (user != null) {
-        AppStorage.saveUser(user);
-        ref.read(loginStateProvider.notifier).setUser(user);
-        context.router.replace(AppRoutes.homePage);
-      } else {
-        context.router.replaceAll([AppRoutes.registerPage]);
+        context.showErrorSnackBar('Signup failed: ${e.toString()}');
       }
     }
   }
@@ -102,22 +99,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 controller: _emailController,
                 hintText: 'Enter email',
                 keyboardType: TextInputType.emailAddress,
+                padding: EdgeInsets.symmetric(horizontal: spacing16),
               ),
+              SizedBox(height: spacing16),
               LoginTextField(
                 controller: _passwordController,
                 hintText: 'Enter password',
                 isPassword: true,
-                padding: EdgeInsets.only(
-                  left: spacing16,
-                  right: spacing16,
-                  bottom: spacing32,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: spacing16),
               ),
+              SizedBox(height: spacing16),
+              LoginTextField(
+                controller: _confirmPasswordController,
+                hintText: 'Confirm password',
+                isPassword: true,
+                padding: EdgeInsets.symmetric(horizontal: spacing16),
+              ),
+              SizedBox(height: spacing20),
               LoginButton(
-                onPressed: _handleLogin,
+                label: 'Sign Up',
+                onPressed: _handleSignup,
                 isLoading: isLoading,
               ),
-              _buildSignupLink(),
+              _buildLoginLink(),
               verticalSpacer(spacing24),
             ],
           ),
@@ -149,20 +153,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
 
   Widget _buildWelcomeText() => Padding(
-        padding: EdgeInsets.symmetric(horizontal: spacing16),
+        padding: EdgeInsets.all(spacing16),
         child: Text(
-          'Please enter your email and password to get started.',
+          'Create your account to get started.',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: AppTextStyle.titleMediumDark,
         ),
       );
 
-  Widget _buildSignupLink() => Center(
+  Widget _buildLoginLink() => Center(
         child: TextButton(
-          onPressed: () => context.router.replace(AppRoutes.signupPage),
+          onPressed: () => context.router.replace(AppRoutes.loginPage),
           child: Text(
-            'Don\'t have an account? Sign up',
+            'Already have an account? Login',
             style: AppTextStyle.titleMediumDark.copyWith(
               color: AppColor.buttonGreen,
             ),

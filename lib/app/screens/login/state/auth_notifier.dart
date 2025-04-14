@@ -1,4 +1,5 @@
 import 'package:easy_order/app/firebase_services/model/user_model.dart';
+import 'package:easy_order/app/firebase_services/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,6 +89,55 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
     }
   }
 
+  Future<void> signUpWithEmailAndPassword(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
+    try {
+      state = state.copyWith(isLoading: true, error: '');
+
+      final UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      if (userCredential.user != null) {
+        state = state.copyWith(
+          isLoading: false,
+          isLoggedIn: true,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'The password provided is too weak.';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'An account already exists with this email.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is invalid.';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Email/password accounts are not enabled.';
+          break;
+        default:
+          errorMessage = 'An error occurred during registration: ${e.code}';
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        error: errorMessage,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'An unexpected error occurred during registration.',
+      );
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await _auth.signOut();
@@ -100,6 +150,39 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
   }
 
   void setUser(UserModel user) => state = state.copyWith(user: user);
+
+  Future<void> createUser({
+    required String name,
+    required String phone,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true, error: '');
+
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No authenticated user found');
+      }
+
+      final userModel = UserModel(
+        uid: currentUser.uid,
+        name: name,
+        email: currentUser.email ?? '',
+        phone: phone,
+      );
+
+      await UserService.createUser(userModel);
+      state = state.copyWith(
+        isLoading: false,
+        user: userModel,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to create user: ${e.toString()}',
+      );
+      rethrow;
+    }
+  }
 
   // Future<void> checkAuthStatus() async {
   //   final User? currentUser = _auth.currentUser;

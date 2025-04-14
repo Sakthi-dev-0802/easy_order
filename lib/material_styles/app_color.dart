@@ -7,6 +7,7 @@ class AppColor {
   static const Color backgroundWhite = Color(0xFFFFFFFF);
 
   // Border & Divider Colors
+  static const Color borderGreen = Color(0xFF298F05);
   static const Color borderMutedGray = Color(0xFFD0D5DD);
 
   // Button Background Colors

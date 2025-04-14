@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:easy_order/app/firebase_services/model/user_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
 class AppStorage {
   AppStorage._internal();
 

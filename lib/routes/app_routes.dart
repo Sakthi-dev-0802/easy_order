@@ -7,6 +7,9 @@ class AppRoutes {
   //Login Route
   static get loginPage => const LoginRoute();
 
+  //Signup Route
+  static get signupPage => const SignupRoute();
+
   //Register Route
   static get registerPage => const RegisterRoute();
 

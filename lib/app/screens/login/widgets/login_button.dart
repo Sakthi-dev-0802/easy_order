@@ -6,17 +6,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class LoginButton extends ConsumerWidget {
   final VoidCallback onPressed;
   final bool isLoading;
+  final String label;
+  final EdgeInsets? padding;
 
   const LoginButton({
     super.key,
     required this.onPressed,
     required this.isLoading,
+    this.label = 'Login',
+    this.padding,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing16),
+      padding: padding ?? EdgeInsets.symmetric(horizontal: spacing16),
       child: GestureDetector(
         onTap: isLoading ? null : onPressed,
         child: Container(
@@ -38,7 +42,7 @@ class LoginButton extends ConsumerWidget {
                     ),
                   )
                 : Text(
-                    'Login',
+                    label,
                     style: AppTextStyle.titleLargeLightWhite,
                   ),
           ),

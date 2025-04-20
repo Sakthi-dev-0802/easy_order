@@ -2,9 +2,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/custom_form_field.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/spacing_constant.dart';
+import 'package:easy_order/app/firebase_services/model/market_model.dart';
+import 'package:easy_order/app/screens/login/providers/markets_provider.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
 import 'package:easy_order/core/storage/app_storage.dart';
+import 'package:easy_order/core/utils/user_market_service.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +23,7 @@ class RegisterPage extends ConsumerStatefulWidget {
 class _RegisterPageState extends ConsumerState<RegisterPage> {
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
-  String? _selectedMarket;
+  MarketModel? _selectedMarket;
 
   @override
   void initState() {
@@ -37,7 +40,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Future<void> _handleSubmit() async {
-    if (_nameController.text.isEmpty || _phoneController.text.isEmpty) {
+    if (_nameController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _selectedMarket == null) {
       if (mounted) {
         context.showErrorSnackBar('Please fill in all fields');
       }
@@ -48,11 +53,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       await ref.read(loginStateProvider.notifier).createUser(
             name: _nameController.text,
             phone: _phoneController.text,
+            marketId: _selectedMarket!.marketId,
           );
 
       final user = ref.watch(loginStateProvider).user;
       if (user != null) {
         await AppStorage.saveUser(user);
+        UserMarketService.setUserMarket(user.marketId);
         if (mounted) {
           context.router.replace(AppRoutes.homePage);
         }
@@ -67,6 +74,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(loginStateProvider).isLoading;
+    final marketsAsync = ref.watch(marketsProvider);
+
+    final markets = marketsAsync.when(
+      data: (markets) => markets,
+      loading: () => <MarketModel>[],
+      error: (_, __) => <MarketModel>[],
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -91,14 +105,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 CustomFormField.dropdown(
                   label: 'Select Market',
-                  value: _selectedMarket,
-                  items: const [
-                    'GD Market',
-                    'MRT Market',
-                  ],
+                  value: _selectedMarket?.name,
+                  items: markets.map((market) => market.name).toList(),
                   onChanged: (value) {
                     setState(() {
-                      _selectedMarket = value as String;
+                      _selectedMarket =
+                          markets.firstWhere((market) => market.name == value);
                     });
                   },
                 ),

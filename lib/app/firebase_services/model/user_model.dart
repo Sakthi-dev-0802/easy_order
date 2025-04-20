@@ -3,12 +3,14 @@ class UserModel {
   final String name;
   final String email;
   final String phone;
+  final String marketId;
 
   UserModel({
     required this.uid,
     required this.name,
     required this.email,
     required this.phone,
+    required this.marketId,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> data) {
@@ -16,7 +18,8 @@ class UserModel {
       uid: data['uid'] ?? '',
       name: data['name'] ?? '',
       email: data['email'] ?? '',
-      phone: data['phone'] ?? ''
+      phone: data['phone'] ?? '',
+      marketId: data['marketId'] ?? '',
     );
   }
 
@@ -26,6 +29,7 @@ class UserModel {
       'name': name,
       'email': email,
       'phone': phone,
+      'marketId': marketId,
     };
   }
 }

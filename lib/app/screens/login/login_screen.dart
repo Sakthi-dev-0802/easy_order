@@ -7,6 +7,7 @@ import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
 import 'package:easy_order/app/screens/login/widgets/login_text_field.dart';
 import 'package:easy_order/core/storage/app_storage.dart';
+import 'package:easy_order/core/utils/user_market_service.dart';
 import 'package:easy_order/material_styles/material_style.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -72,12 +73,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> naviagteUser() async {
     final user = await UserService.getCurrentUser(_emailController.text.trim());
-    if (mounted) {
-      if (user != null) {
-        AppStorage.saveUser(user);
-        ref.read(loginStateProvider.notifier).setUser(user);
+
+    if (user != null) {
+      await AppStorage.saveUser(user);
+      UserMarketService.setUserMarket(user.marketId);
+      ref.read(loginStateProvider.notifier).setUser(user);
+      if (mounted) {
         context.router.replace(AppRoutes.homePage);
-      } else {
+      }
+    } else {
+      if (mounted) {
         context.router.replaceAll([AppRoutes.registerPage]);
       }
     }

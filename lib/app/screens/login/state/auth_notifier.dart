@@ -1,8 +1,11 @@
+import 'package:easy_order/app/firebase_services/model/market_model.dart';
 import 'package:easy_order/app/firebase_services/model/user_model.dart';
 import 'package:easy_order/app/firebase_services/services/user_service.dart';
+import 'package:easy_order/core/storage/app_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 class LoginState {
   final bool isLoading;
@@ -22,6 +25,7 @@ class LoginState {
     String? error,
     bool? isLoggedIn,
     UserModel? user,
+    List<MarketModel>? markets,
   }) {
     return LoginState(
       isLoading: isLoading ?? this.isLoading,
@@ -140,6 +144,7 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
 
   Future<void> signOut() async {
     try {
+      await AppStorage.clearUser();
       await _auth.signOut();
       state = LoginState();
     } catch (e) {
@@ -154,6 +159,7 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
   Future<void> createUser({
     required String name,
     required String phone,
+    required String marketId,
   }) async {
     try {
       state = state.copyWith(isLoading: true, error: '');
@@ -163,17 +169,18 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
         throw Exception('No authenticated user found');
       }
 
-      final userModel = UserModel(
-        uid: currentUser.uid,
+      final newUser = UserModel(
+        uid: const Uuid().v4(),
         name: name,
         email: currentUser.email ?? '',
         phone: phone,
+        marketId: marketId,
       );
 
-      await UserService.createUser(userModel);
+      await UserService.createUser(newUser);
       state = state.copyWith(
         isLoading: false,
-        user: userModel,
+        user: newUser,
       );
     } catch (e) {
       state = state.copyWith(
@@ -183,16 +190,6 @@ class LoginStateNotifier extends StateNotifier<LoginState> {
       rethrow;
     }
   }
-
-  // Future<void> checkAuthStatus() async {
-  //   final User? currentUser = _auth.currentUser;
-  //   if (currentUser != null) {
-  //     state = state.copyWith(
-  //       isLoggedIn: true,
-  //       user: currentUser,
-  //     );
-  //   }
-  // }
 }
 
 final loginStateProvider =

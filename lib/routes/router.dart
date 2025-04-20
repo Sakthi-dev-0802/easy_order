@@ -22,12 +22,16 @@ class AppRouter extends $AppRouter {
       path: '/signup',
     ),
     AutoRoute(
-      page: HomeScreen.page,
+      page: HomeRoute.page,
       path: '/home',
     ),
     AutoRoute(
       page: RegisterRoute.page,
       path: '/register',
+    ),
+    AutoRoute(
+      page: MarketProfileRoute.page,
+      path: '/market-profile',
     ),
   ];
 }

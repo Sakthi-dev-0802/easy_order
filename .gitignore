@@ -33,6 +33,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+# Ignore configure_fingerprint.bin
+**/configure_fingerprint.bin
 
 # Flutter specific ignores
 *.dart_tool/
@@ -63,5 +65,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
 /assettracker_flutter/lib/gen

@@ -14,5 +14,8 @@ class AppRoutes {
   static get registerPage => const RegisterRoute();
 
   //Home Route
-  static get homePage => const HomeScreen();
+  static get homePage => const HomeRoute();
+
+  //Market Profile Route
+  static get marketProfilePage => const MarketProfileRoute();
 }

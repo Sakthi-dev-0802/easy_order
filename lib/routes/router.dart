@@ -33,5 +33,17 @@ class AppRouter extends $AppRouter {
       page: MarketProfileRoute.page,
       path: '/market-profile',
     ),
+    AutoRoute(
+      page: LineRoute.page,
+      path: '/line',
+    ),
+    AutoRoute(
+      page: MarketInfoRoute.page,
+      path: '/marketinfo',
+    ),
+    AutoRoute(
+      page: LandingRoute.page,
+      path: '/landing',
+    ),
   ];
 }

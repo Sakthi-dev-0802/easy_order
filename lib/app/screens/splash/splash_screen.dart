@@ -33,7 +33,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       currentContext.router.replaceAll([AppRoutes.loginPage]);
     } else {
       ref.read(loginStateProvider.notifier).setUser(user);
-      currentContext.router.replaceAll([AppRoutes.homePage]);
+      currentContext.router.replaceAll([AppRoutes.landing]);
     }
   }
 

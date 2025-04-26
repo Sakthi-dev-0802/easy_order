@@ -61,7 +61,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         await AppStorage.saveUser(user);
         UserMarketService.setUserMarket(user.marketId);
         if (mounted) {
-          context.router.replace(AppRoutes.homePage);
+          context.router.replace(AppRoutes.landing);
         }
       }
     } catch (e) {

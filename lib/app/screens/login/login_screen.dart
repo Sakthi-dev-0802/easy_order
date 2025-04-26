@@ -79,7 +79,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       UserMarketService.setUserMarket(user.marketId);
       ref.read(loginStateProvider.notifier).setUser(user);
       if (mounted) {
-        context.router.replace(AppRoutes.homePage);
+        context.router.replace(AppRoutes.landing);
       }
     } else {
       if (mounted) {

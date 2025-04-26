@@ -18,4 +18,13 @@ class AppRoutes {
 
   //Market Profile Route
   static get marketProfilePage => const MarketProfileRoute();
+
+//Line Route
+  static get linepage => const LineRoute();
+
+//MarketInfo Route
+  static get marketinfo => const MarketInfoRoute();
+
+//Landing Route
+  static get landing => const LandingRoute();
 }

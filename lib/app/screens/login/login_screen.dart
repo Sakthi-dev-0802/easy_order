@@ -3,6 +3,7 @@ import 'package:easy_order/app/components/components.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/firebase_services/services/user_service.dart';
+import 'package:easy_order/app/screens/landing/state/landing_screen_notifier.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
 import 'package:easy_order/app/screens/login/widgets/login_text_field.dart';
@@ -79,6 +80,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       UserMarketService.setUserMarket(user.marketId);
       ref.read(loginStateProvider.notifier).setUser(user);
       if (mounted) {
+        ref.read(landingScreenStateProvider.notifier).changePage(0);
         context.router.replace(AppRoutes.landing);
       }
     } else {

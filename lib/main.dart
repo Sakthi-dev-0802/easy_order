@@ -23,9 +23,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-        title: 'Easy Order',
-        debugShowCheckedModeBanner: false,
-        routerDelegate: _router.delegate(),
-        routeInformationParser: _router.defaultRouteParser());
+      title: 'Easy Order',
+      debugShowCheckedModeBanner: false,
+      routerDelegate: _router.delegate(),
+      routeInformationParser: _router.defaultRouteParser(),
+    );
   }
 }

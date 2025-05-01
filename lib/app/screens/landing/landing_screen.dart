@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_order/app/components/button_component.dart';
 import 'package:easy_order/app/screens/home/home_screen.dart';
 import 'package:easy_order/app/screens/line/line_screen.dart';
 import 'package:easy_order/app/screens/market_info/market_info.dart';
@@ -28,20 +27,20 @@ class LandingPage extends ConsumerWidget {
           notifier.changePage(0);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          actionsPadding: const EdgeInsets.only(right: 12),
-          backgroundColor: Colors.white,
-          title: const Text("Market 1"),
-          actions: [
-            ButtonComponent.filled(
-              label: "order",
-              onTap: () {},
-            )
-          ],
-        ),
-        body: const SafeArea(child: _BodyWidget()),
-        bottomNavigationBar: const _BottomNavWidget(),
+      child: const Scaffold(
+        // appBar: AppBar(
+        //   actionsPadding: const EdgeInsets.only(right: 12),
+        //   backgroundColor: Colors.white,
+        //   title: const Text("Market 1"),
+        //   actions: [
+        //     ButtonComponent.filled(
+        //       label: "order",
+        //       onTap: () {},
+        //     )
+        //   ],
+        // ),
+        body: _BodyWidget(),
+        bottomNavigationBar: _BottomNavWidget(),
       ),
     );
   }

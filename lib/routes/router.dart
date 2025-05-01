@@ -30,10 +30,6 @@ class AppRouter extends $AppRouter {
       path: '/register',
     ),
     AutoRoute(
-      page: MarketProfileRoute.page,
-      path: '/market-profile',
-    ),
-    AutoRoute(
       page: LineRoute.page,
       path: '/line',
     ),

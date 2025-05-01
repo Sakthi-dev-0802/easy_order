@@ -16,15 +16,12 @@ class AppRoutes {
   //Home Route
   static get homePage => const HomeRoute();
 
-  //Market Profile Route
-  static get marketProfilePage => const MarketProfileRoute();
-
-//Line Route
+  //Line Route
   static get linepage => const LineRoute();
 
-//MarketInfo Route
+  //MarketInfo Route
   static get marketinfo => const MarketInfoRoute();
 
-//Landing Route
+  //Landing Route
   static get landing => const LandingRoute();
 }

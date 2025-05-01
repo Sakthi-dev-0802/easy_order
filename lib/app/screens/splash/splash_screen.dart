@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/constants/sizing_constant.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/core/storage/app_storage.dart';
+import 'package:easy_order/core/utils/user_market_service.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       currentContext.router.replaceAll([AppRoutes.loginPage]);
     } else {
       ref.read(loginStateProvider.notifier).setUser(user);
+      UserMarketService.setUserMarket(user.marketId);
       currentContext.router.replaceAll([AppRoutes.landing]);
     }
   }

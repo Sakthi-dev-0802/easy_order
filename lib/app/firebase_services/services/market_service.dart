@@ -20,6 +20,15 @@ class MarketService with FirestoreService {
     }, 'fetching all markets');
   }
 
+  static Future<MarketModel?> getMarketById(String marketId) async {
+    return await FirestoreService.performFirestoreOperation(() async {
+      DocumentSnapshot doc = await _marketCollection.doc(marketId).get();
+      return doc.exists
+          ? MarketModel.fromMap(doc.data() as Map<String, dynamic>)
+          : null;
+    }, 'fetching market with id: $marketId');
+  }
+
   // static Future<void> createUser(UserModel newUser) async {
   //   await FirestoreService.performFirestoreOperation(() async {
   //     await _usersCollection.doc(newUser.email).set(newUser.toMap());

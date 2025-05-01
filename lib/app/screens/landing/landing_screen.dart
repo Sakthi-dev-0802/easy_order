@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/screens/home/home_screen.dart';
 import 'package:easy_order/app/screens/line/line_screen.dart';
-import 'package:easy_order/app/screens/market_info/market_info.dart';
+import 'package:easy_order/app/screens/market_info/market_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

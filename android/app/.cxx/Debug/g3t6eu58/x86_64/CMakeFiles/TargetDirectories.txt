@@ -1,0 +1,2 @@
+/Users/sakthi/Desktop/Projects/easy_order/android/app/.cxx/Debug/g3t6eu58/x86_64/CMakeFiles/edit_cache.dir
+/Users/sakthi/Desktop/Projects/easy_order/android/app/.cxx/Debug/g3t6eu58/x86_64/CMakeFiles/rebuild_cache.dir

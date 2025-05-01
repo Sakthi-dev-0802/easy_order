@@ -10,12 +10,36 @@ class AppRouter extends $AppRouter {
   @override
   final List<AutoRoute> routes = [
     AutoRoute(
-      page: EnterMobileNumberRoute.page,
+      page: SplashRoute.page,
       path: '/',
     ),
     AutoRoute(
-      page: EnterOtpRoute.page,
-      path: '/enter-otp',
+      page: LoginRoute.page,
+      path: '/login',
+    ),
+    AutoRoute(
+      page: SignupRoute.page,
+      path: '/signup',
+    ),
+    AutoRoute(
+      page: HomeRoute.page,
+      path: '/home',
+    ),
+    AutoRoute(
+      page: RegisterRoute.page,
+      path: '/register',
+    ),
+    AutoRoute(
+      page: LineRoute.page,
+      path: '/line',
+    ),
+    AutoRoute(
+      page: MarketInfoRoute.page,
+      path: '/marketinfo',
+    ),
+    AutoRoute(
+      page: LandingRoute.page,
+      path: '/landing',
     ),
   ];
 }

@@ -39,7 +39,6 @@ class AppTextStyle {
     color: AppColor.textWhite,
   );
 
-
   // Subheading Text
   // 20, 21, 22, 23, 24
   // static final TextStyle subHeadingLargeBlack = GoogleFonts.inter(

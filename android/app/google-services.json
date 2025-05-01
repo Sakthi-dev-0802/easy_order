@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "509849925790",
+    "project_id": "easy-order-8e1a2",
+    "storage_bucket": "easy-order-8e1a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509849925790:android:12a99051aae036058b238f",
+        "android_client_info": {
+          "package_name": "com.sakthi.easy_order"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoU5uxvOha78NWmeOpxSE8qBvRgvYQX8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

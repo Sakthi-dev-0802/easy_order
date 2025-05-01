@@ -1,13 +1,16 @@
 # Miscellaneous
 *.class
+*.lock
 *.log
 *.pyc
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -30,6 +33,27 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+# Ignore configure_fingerprint.bin
+**/configure_fingerprint.bin
+
+# Flutter specific ignores
+*.dart_tool/
+*.packages
+.pub/
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Pods/
+ios/Podfile.lock
+android/.gradle/
+android/gradle/
+android/gradle-wrapper.jar
+android/gradle-wrapper.properties
+*.jks
+*.keystore
+*.g.dart
+*.gr.dart
+*.freezed.dart
 
 # Symbolication related
 app.*.symbols
@@ -41,3 +65,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/assettracker_flutter/lib/gen

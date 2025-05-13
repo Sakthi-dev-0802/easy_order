@@ -24,4 +24,13 @@ class AppRoutes {
 
   //Landing Route
   static get landing => const LandingRoute();
+
+  //Add Line Route
+  static get addLinePage => const AddLineRoute();
+
+  //Clients List Route
+  static get clientsListPage => const ClientsListRoute();
+
+  //Add Client Route
+  static get addClientPage => const AddClientRoute();
 }

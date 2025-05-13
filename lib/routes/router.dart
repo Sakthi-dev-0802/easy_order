@@ -41,5 +41,17 @@ class AppRouter extends $AppRouter {
       page: LandingRoute.page,
       path: '/landing',
     ),
+    AutoRoute(
+      page: AddLineRoute.page,
+      path: '/addline',
+    ),
+    AutoRoute(
+      page: ClientsListRoute.page,
+      path: '/clients',
+    ),
+    AutoRoute(
+      page: AddClientRoute.page,
+      path: '/addclient',
+    ),
   ];
 }

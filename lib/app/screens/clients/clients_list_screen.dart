@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
 import 'package:easy_order/app/screens/clients/providers/orders_provider.dart';
+import 'package:easy_order/app/screens/line/state/line_notifier.dart';
 import 'package:easy_order/app/screens/market_info/providers/market_provider.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/material_styles/app_text_style.dart';
@@ -11,12 +13,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @RoutePage()
 class ClientsListPage extends ConsumerWidget {
-  const ClientsListPage({super.key});
+  final String? lineId;
+  const ClientsListPage({super.key, this.lineId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final clientsAsync = ref.watch(clientsProvider);
     final todayTotalOrdersAsync = ref.watch(todayTotalOrdersProvider);
+    final lineState = ref.watch(lineStateProvider);
 
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
@@ -31,12 +35,37 @@ class ClientsListPage extends ConsumerWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              context.router.push(AppRoutes.addLinePage);
-            },
-          ),
+          lineState.isLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColor.buttonGreen,
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    if (lineId != null) {
+                      await ref
+                          .read(lineStateProvider.notifier)
+                          .getLineById(lineId!);
+                      if (lineState.line != null) {
+                        if (context.mounted) {
+                          if (lineState.error != null) {
+                            context.showErrorSnackBar(lineState.error!);
+                          } else {
+                            context.router.push(
+                                AppRoutes.addLinePage(line: lineState.line));
+                          }
+                        }
+                      }
+                    } else {
+                      context.showErrorSnackBar('Line ID is required');
+                    }
+                  },
+                ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {

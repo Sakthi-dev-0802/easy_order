@@ -1,3 +1,4 @@
+import 'package:easy_order/app/firebase_services/model/line_model.dart';
 import 'package:easy_order/routes/router.gr.dart';
 
 class AppRoutes {
@@ -26,10 +27,10 @@ class AppRoutes {
   static get landing => const LandingRoute();
 
   //Add Line Route
-  static get addLinePage => const AddLineRoute();
+  static addLinePage({LineModel? line}) => AddLineRoute(line: line);
 
   //Clients List Route
-  static get clientsListPage => const ClientsListRoute();
+  static clientsListPage(String lineId) => ClientsListRoute(lineId: lineId);
 
   //Add Client Route
   static get addClientPage => const AddClientRoute();

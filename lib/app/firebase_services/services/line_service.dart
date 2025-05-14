@@ -19,14 +19,14 @@ class LineService with FirestoreService {
     await _linesCollection.doc(line.lineId).update(line.toMap());
   }
 
-  /*Future<void> deleteLine(String lineId) async {
+  Future<void> deleteLine(String lineId) async {
     await _linesCollection.doc(lineId).delete();
-  }*/
+  }
 
-  /*Future<LineModel> getLine(String lineId) async {
+  Future<LineModel> getLine(String lineId) async {
     final doc = await _linesCollection.doc(lineId).get();
     return LineModel.fromMap(doc.data() as Map<String, dynamic>);
-  }*/
+  }
 
   Stream<List<LineModel>> getLinesByMarketId(String marketId) {
     return _linesCollection

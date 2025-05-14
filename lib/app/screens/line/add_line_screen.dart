@@ -1,19 +1,35 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/custom_form_field.dart';
+import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
+import 'package:easy_order/app/firebase_services/model/line_model.dart';
+import 'package:easy_order/app/screens/landing/state/landing_screen_notifier.dart';
+import 'package:easy_order/app/screens/line/state/line_notifier.dart';
 import 'package:easy_order/material_styles/app_color.dart';
+import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @RoutePage()
-class AddLinePage extends StatefulWidget {
-  const AddLinePage({super.key});
+class AddLinePage extends ConsumerStatefulWidget {
+  final LineModel? line;
+  const AddLinePage({super.key, this.line});
 
   @override
-  State<AddLinePage> createState() => _AddLinePageState();
+  ConsumerState<AddLinePage> createState() => _AddLinePageState();
 }
 
-class _AddLinePageState extends State<AddLinePage> {
-  final TextEditingController _lineNameController = TextEditingController();
+class _AddLinePageState extends ConsumerState<AddLinePage> {
+  late TextEditingController _lineNameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _lineNameController = TextEditingController();
+    if (widget.line != null) {
+      _lineNameController.text = widget.line!.lineName;
+    }
+  }
 
   @override
   void dispose() {
@@ -23,11 +39,47 @@ class _AddLinePageState extends State<AddLinePage> {
 
   @override
   Widget build(BuildContext context) {
+    final lineState = ref.watch(lineStateProvider);
+
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
-        title: const Text('Add New Line'),
+        title: Text(widget.line != null ? 'Edit Line' : 'Add New Line'),
         elevation: 0,
+        actions: [
+          if (widget.line != null)
+            lineState.isDeleting
+                ? const Padding(
+                    padding: EdgeInsets.only(right: 16),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        strokeCap: StrokeCap.round,
+                        color: AppColor.buttonGreen,
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    onPressed: () async {
+                      await ref
+                          .read(lineStateProvider.notifier)
+                          .deleteLine(widget.line!.lineId);
+                      if (context.mounted) {
+                        if (lineState.error != null) {
+                          context.showErrorSnackBar(lineState.error!);
+                        } else {
+                          ref
+                              .read(landingScreenStateProvider.notifier)
+                              .changePage(1);
+                          context.router.replaceAll([AppRoutes.landing]);
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(spacing16),
@@ -42,11 +94,26 @@ class _AddLinePageState extends State<AddLinePage> {
             ),
             SizedBox(height: spacing32),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Handle save line
-                if (_lineNameController.text.isNotEmpty) {
-                  print('Saving line: ${_lineNameController.text}');
-                  context.router.pop();
+              onPressed: () async {
+                if (_lineNameController.text.isEmpty) {
+                  context.showErrorSnackBar('Fill the line name');
+                } else {
+                  if (widget.line != null) {
+                    await ref.read(lineStateProvider.notifier).updateLine(
+                        widget.line!.lineId, _lineNameController.text);
+                  } else {
+                    await ref
+                        .read(lineStateProvider.notifier)
+                        .createLine(_lineNameController.text);
+                  }
+
+                  if (context.mounted) {
+                    if (lineState.error != null) {
+                      context.showErrorSnackBar(lineState.error!);
+                    } else {
+                      context.router.back();
+                    }
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -56,14 +123,26 @@ class _AddLinePageState extends State<AddLinePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                'Save Line',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: lineState.isLoading
+                  ? const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                          strokeCap: StrokeCap.round,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      widget.line != null ? 'Update Line' : 'Save Line',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ],
         ),

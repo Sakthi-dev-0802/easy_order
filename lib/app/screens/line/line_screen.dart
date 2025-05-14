@@ -43,7 +43,9 @@ class LinePage extends ConsumerWidget {
                     return LineCard(
                       lineName: lines[index].lineName,
                       onTap: () {
-                        context.router.navigate(AppRoutes.clientsListPage);
+                        context.router.navigate(
+                          AppRoutes.clientsListPage(lines[index].lineId),
+                        );
                       },
                     );
                   },
@@ -78,7 +80,7 @@ class LinePage extends ConsumerWidget {
         ),
         child: FloatingActionButton(
           onPressed: () {
-            context.router.navigate(AppRoutes.addLinePage);
+            context.router.navigate(AppRoutes.addLinePage());
           },
           backgroundColor: Colors.transparent,
           elevation: 0,

@@ -9,6 +9,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i12;
+import 'package:easy_order/app/firebase_services/model/line_model.dart' as _i14;
 import 'package:easy_order/app/screens/clients/add_client_screen.dart' as _i1;
 import 'package:easy_order/app/screens/clients/clients_list_screen.dart' as _i3;
 import 'package:easy_order/app/screens/home/home_screen.dart' as _i4;
@@ -21,6 +22,7 @@ import 'package:easy_order/app/screens/login/signup_screen.dart' as _i10;
 import 'package:easy_order/app/screens/market_info/market_info_screen.dart'
     as _i8;
 import 'package:easy_order/app/screens/splash/splash_screen.dart' as _i11;
+import 'package:flutter/material.dart' as _i13;
 
 abstract class $AppRouter extends _i12.RootStackRouter {
   $AppRouter({super.navigatorKey});
@@ -34,15 +36,25 @@ abstract class $AppRouter extends _i12.RootStackRouter {
       );
     },
     AddLineRoute.name: (routeData) {
+      final args = routeData.argsAs<AddLineRouteArgs>(
+          orElse: () => const AddLineRouteArgs());
       return _i12.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i2.AddLinePage(),
+        child: _i2.AddLinePage(
+          key: args.key,
+          line: args.line,
+        ),
       );
     },
     ClientsListRoute.name: (routeData) {
+      final args = routeData.argsAs<ClientsListRouteArgs>(
+          orElse: () => const ClientsListRouteArgs());
       return _i12.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i3.ClientsListPage(),
+        child: _i3.ClientsListPage(
+          key: args.key,
+          lineId: args.lineId,
+        ),
       );
     },
     HomeRoute.name: (routeData) {
@@ -112,30 +124,78 @@ class AddClientRoute extends _i12.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.AddLinePage]
-class AddLineRoute extends _i12.PageRouteInfo<void> {
-  const AddLineRoute({List<_i12.PageRouteInfo>? children})
-      : super(
+class AddLineRoute extends _i12.PageRouteInfo<AddLineRouteArgs> {
+  AddLineRoute({
+    _i13.Key? key,
+    _i14.LineModel? line,
+    List<_i12.PageRouteInfo>? children,
+  }) : super(
           AddLineRoute.name,
+          args: AddLineRouteArgs(
+            key: key,
+            line: line,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'AddLineRoute';
 
-  static const _i12.PageInfo<void> page = _i12.PageInfo<void>(name);
+  static const _i12.PageInfo<AddLineRouteArgs> page =
+      _i12.PageInfo<AddLineRouteArgs>(name);
+}
+
+class AddLineRouteArgs {
+  const AddLineRouteArgs({
+    this.key,
+    this.line,
+  });
+
+  final _i13.Key? key;
+
+  final _i14.LineModel? line;
+
+  @override
+  String toString() {
+    return 'AddLineRouteArgs{key: $key, line: $line}';
+  }
 }
 
 /// generated route for
 /// [_i3.ClientsListPage]
-class ClientsListRoute extends _i12.PageRouteInfo<void> {
-  const ClientsListRoute({List<_i12.PageRouteInfo>? children})
-      : super(
+class ClientsListRoute extends _i12.PageRouteInfo<ClientsListRouteArgs> {
+  ClientsListRoute({
+    _i13.Key? key,
+    String? lineId,
+    List<_i12.PageRouteInfo>? children,
+  }) : super(
           ClientsListRoute.name,
+          args: ClientsListRouteArgs(
+            key: key,
+            lineId: lineId,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'ClientsListRoute';
 
-  static const _i12.PageInfo<void> page = _i12.PageInfo<void>(name);
+  static const _i12.PageInfo<ClientsListRouteArgs> page =
+      _i12.PageInfo<ClientsListRouteArgs>(name);
+}
+
+class ClientsListRouteArgs {
+  const ClientsListRouteArgs({
+    this.key,
+    this.lineId,
+  });
+
+  final _i13.Key? key;
+
+  final String? lineId;
+
+  @override
+  String toString() {
+    return 'ClientsListRouteArgs{key: $key, lineId: $lineId}';
+  }
 }
 
 /// generated route for

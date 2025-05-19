@@ -16,6 +16,7 @@ class CustomFormField extends StatefulWidget {
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.value,
     this.items = const [],
+    this.displayItems = const [],
     this.obscureText = false,
     this.togglePassword,
     required this.fieldType,
@@ -76,6 +77,7 @@ class CustomFormField extends StatefulWidget {
     required String label,
     required String? value,
     required List<String> items,
+    List<String>? displayItems,
     required ValueChanged<String?> onChanged,
     FloatingLabelBehavior floatingLabelBehavior = FloatingLabelBehavior.auto,
     Key? key,
@@ -85,6 +87,7 @@ class CustomFormField extends StatefulWidget {
       label: label,
       value: value,
       items: items,
+      displayItems: displayItems ?? items,
       onChanged: onChanged,
       fieldType: FormFieldType.dropdown,
       floatingLabelBehavior: floatingLabelBehavior,
@@ -106,6 +109,7 @@ class CustomFormField extends StatefulWidget {
   // For DropDown
   final String? value;
   final List<String> items;
+  final List<String> displayItems;
 
   // Type
   final FormFieldType fieldType;
@@ -201,11 +205,13 @@ class _CustomFormFieldState extends State<CustomFormField> {
   Widget _buildDropdownField() {
     return DropdownButtonFormField<String>(
       value: widget.value,
-      items: widget.items
-          .map(
-            (item) => DropdownMenuItem<String>(value: item, child: Text(item)),
-          )
-          .toList(),
+      items: List.generate(
+        widget.items.length,
+        (index) => DropdownMenuItem<String>(
+          value: widget.items[index],
+          child: Text(widget.displayItems[index]),
+        ),
+      ),
       onChanged: widget.enabled ? widget.onChanged : null,
       decoration: _getFieldDecoration(),
       style: GoogleFonts.openSans(

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/screens/line/providers/lines_provider.dart';
+import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ class LinePage extends ConsumerWidget {
     final linesAsync = ref.watch(linesProvider);
 
     return Scaffold(
+      backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
         title: const Text('Select Line'),
         elevation: 0,
@@ -44,7 +46,10 @@ class LinePage extends ConsumerWidget {
                       lineName: lines[index].lineName,
                       onTap: () {
                         context.router.navigate(
-                          AppRoutes.clientsListPage(lines[index].lineId),
+                          AppRoutes.clientsListPage(
+                            lines[index].lineId,
+                            lines[index].lineName,
+                          ),
                         );
                       },
                     );

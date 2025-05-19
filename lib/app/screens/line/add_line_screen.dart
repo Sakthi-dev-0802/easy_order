@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/custom_form_field.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
-import 'package:easy_order/app/firebase_services/model/line_model.dart';
 import 'package:easy_order/app/screens/landing/state/landing_screen_notifier.dart';
 import 'package:easy_order/app/screens/line/state/line_notifier.dart';
 import 'package:easy_order/material_styles/app_color.dart';
@@ -12,8 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @RoutePage()
 class AddLinePage extends ConsumerStatefulWidget {
-  final LineModel? line;
-  const AddLinePage({super.key, this.line});
+  final String? lineId;
+  final String? lineName;
+  const AddLinePage({super.key, this.lineId, this.lineName});
 
   @override
   ConsumerState<AddLinePage> createState() => _AddLinePageState();
@@ -26,8 +26,8 @@ class _AddLinePageState extends ConsumerState<AddLinePage> {
   void initState() {
     super.initState();
     _lineNameController = TextEditingController();
-    if (widget.line != null) {
-      _lineNameController.text = widget.line!.lineName;
+    if (widget.lineName != null) {
+      _lineNameController.text = widget.lineName!;
     }
   }
 
@@ -44,10 +44,10 @@ class _AddLinePageState extends ConsumerState<AddLinePage> {
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
-        title: Text(widget.line != null ? 'Edit Line' : 'Add New Line'),
+        title: Text(widget.lineId != null ? 'Edit Line' : 'Add New Line'),
         elevation: 0,
         actions: [
-          if (widget.line != null)
+          if (widget.lineId != null)
             lineState.isDeleting
                 ? const Padding(
                     padding: EdgeInsets.only(right: 16),
@@ -65,7 +65,7 @@ class _AddLinePageState extends ConsumerState<AddLinePage> {
                     onPressed: () async {
                       await ref
                           .read(lineStateProvider.notifier)
-                          .deleteLine(widget.line!.lineId);
+                          .deleteLine(widget.lineId!);
                       if (context.mounted) {
                         if (lineState.error != null) {
                           context.showErrorSnackBar(lineState.error!);
@@ -92,26 +92,30 @@ class _AddLinePageState extends ConsumerState<AddLinePage> {
               controller: _lineNameController,
               hintText: 'Enter line name',
             ),
-            SizedBox(height: spacing32),
+            SizedBox(height: spacing32),  
             ElevatedButton(
               onPressed: () async {
                 if (_lineNameController.text.isEmpty) {
                   context.showErrorSnackBar('Fill the line name');
                 } else {
-                  if (widget.line != null) {
-                    await ref.read(lineStateProvider.notifier).updateLine(
-                        widget.line!.lineId, _lineNameController.text);
+                  if (widget.lineId != null) {
+                    await ref
+                        .read(lineStateProvider.notifier)
+                        .updateLine(widget.lineId!, _lineNameController.text);
+                    ref.read(landingScreenStateProvider.notifier).changePage(1);
+                    if (context.mounted) {
+                      context.router.replaceAll([AppRoutes.landing]);
+                    }
                   } else {
                     await ref
                         .read(lineStateProvider.notifier)
                         .createLine(_lineNameController.text);
-                  }
-
-                  if (context.mounted) {
-                    if (lineState.error != null) {
-                      context.showErrorSnackBar(lineState.error!);
-                    } else {
-                      context.router.back();
+                    if (context.mounted) {
+                      if (lineState.error != null) {
+                        context.showErrorSnackBar(lineState.error!);
+                      } else {
+                        context.router.back();
+                      }
                     }
                   }
                 }
@@ -136,7 +140,7 @@ class _AddLinePageState extends ConsumerState<AddLinePage> {
                       ),
                     )
                   : Text(
-                      widget.line != null ? 'Update Line' : 'Save Line',
+                      widget.lineId != null ? 'Update Line' : 'Save Line',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

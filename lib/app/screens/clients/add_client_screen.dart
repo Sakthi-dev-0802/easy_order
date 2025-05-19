@@ -1,29 +1,29 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/custom_form_field.dart';
+import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
+import 'package:easy_order/app/firebase_services/model/client_model.dart';
+import 'package:easy_order/app/screens/clients/state/client_notifier.dart';
+import 'package:easy_order/core/utils/user_market_service.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 @RoutePage()
-class AddClientPage extends StatefulWidget {
-  const AddClientPage({super.key});
+class AddClientPage extends ConsumerStatefulWidget {
+  final String? lineId;
+  const AddClientPage({super.key, this.lineId});
 
   @override
-  State<AddClientPage> createState() => _AddClientPageState();
+  ConsumerState<AddClientPage> createState() => _AddClientPageState();
 }
 
-class _AddClientPageState extends State<AddClientPage> {
+class _AddClientPageState extends ConsumerState<AddClientPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  String? _selectedLine;
-
-  final List<String> _lines = [
-    'Perumanallur Line',
-    'Coimbatore Line',
-    'Tirupur Line',
-    'Erode Line'
-  ];
+  // String? _selectedLineId;
 
   @override
   void dispose() {
@@ -33,8 +33,49 @@ class _AddClientPageState extends State<AddClientPage> {
     super.dispose();
   }
 
+  Future<void> _handleSaveClient() async {
+    if (_nameController.text.isNotEmpty &&
+            _phoneController.text.isNotEmpty &&
+            _addressController.text.isNotEmpty
+        // &&
+        // _selectedLineId != null
+        ) {
+      final marketId = UserMarketService.userMarket;
+      if (marketId == null) {
+        if (mounted) {
+          context.showErrorSnackBar('Market ID not found. Please try again.');
+        }
+        return;
+      }
+
+      final client = ClientModel(
+        uid: const Uuid().v4(),
+        name: _nameController.text,
+        phone: _phoneController.text,
+        address: _addressController.text,
+        lineId: widget.lineId ?? '',
+        marketId: marketId,
+      );
+
+      try {
+        await ref.read(clientStateProvider.notifier).createClient(client);
+        if (mounted) {
+          context.router.back();
+        }
+      } catch (e) {
+        if (mounted) {
+          context.showErrorSnackBar('Failed to create client: ${e.toString()}');
+        }
+      }
+    } else {
+      context.showErrorSnackBar('Please fill in all fields');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // final linesAsync = ref.watch(linesProvider);
+
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
@@ -59,17 +100,36 @@ class _AddClientPageState extends State<AddClientPage> {
               hintText: 'Enter phone number',
               keyboardType: TextInputType.phone,
             ),
-            SizedBox(height: spacing16),
-            CustomFormField.dropdown(
-              label: 'Select Line',
-              value: _selectedLine,
-              items: _lines,
-              onChanged: (value) {
-                setState(() {
-                  _selectedLine = value;
-                });
-              },
-            ),
+            // SizedBox(height: spacing16),
+            // linesAsync.when(
+            //   data: (lines) => CustomFormField.dropdown(
+            //     label: 'Select Line',
+            //     value: _selectedLineId,
+            //     items: lines.map((line) => line.lineId).toList(),
+            //     displayItems: lines.map((line) => line.lineName).toList(),
+            //     onChanged: (value) {
+            //       setState(() {
+            //         _selectedLineId = value;
+            //       });
+            //     },
+            //   ),
+            //   loading: () => const Center(
+            //     child: CircularProgressIndicator(
+            //       color: AppColor.buttonGreen,
+            //     ),
+            //   ),
+            //   error: (error, stackTrace) => CustomFormField.dropdown(
+            //     label: 'Select Line',
+            //     value: _selectedLineId,
+            //     items: const [],
+            //     displayItems: const [],
+            //     onChanged: (value) {
+            //       setState(() {
+            //         _selectedLineId = value;
+            //       });
+            //     },
+            //   ),
+            // ),
             SizedBox(height: spacing16),
             CustomFormField.text(
               label: 'Address',
@@ -78,16 +138,7 @@ class _AddClientPageState extends State<AddClientPage> {
             ),
             SizedBox(height: spacing32),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Handle save client
-                if (_nameController.text.isNotEmpty &&
-                    _phoneController.text.isNotEmpty &&
-                    _addressController.text.isNotEmpty &&
-                    _selectedLine != null) {
-                  print('Saving client: ${_nameController.text}');
-                  context.router.pop();
-                }
-              },
+              onPressed: _handleSaveClient,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColor.buttonGreen,
                 padding: EdgeInsets.symmetric(vertical: spacing16),
@@ -95,14 +146,25 @@ class _AddClientPageState extends State<AddClientPage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                'Save Client',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: ref.watch(clientStateProvider).isLoading
+                  ? const Center(
+                      child: SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          color: AppColor.backgroundWhite,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    )
+                  : const Text(
+                      'Save Client',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ],
         ),

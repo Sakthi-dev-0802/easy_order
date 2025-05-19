@@ -9,7 +9,6 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i12;
-import 'package:easy_order/app/firebase_services/model/line_model.dart' as _i14;
 import 'package:easy_order/app/screens/clients/add_client_screen.dart' as _i1;
 import 'package:easy_order/app/screens/clients/clients_list_screen.dart' as _i3;
 import 'package:easy_order/app/screens/home/home_screen.dart' as _i4;
@@ -30,9 +29,14 @@ abstract class $AppRouter extends _i12.RootStackRouter {
   @override
   final Map<String, _i12.PageFactory> pagesMap = {
     AddClientRoute.name: (routeData) {
+      final args = routeData.argsAs<AddClientRouteArgs>(
+          orElse: () => const AddClientRouteArgs());
       return _i12.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i1.AddClientPage(),
+        child: _i1.AddClientPage(
+          key: args.key,
+          lineId: args.lineId,
+        ),
       );
     },
     AddLineRoute.name: (routeData) {
@@ -42,7 +46,8 @@ abstract class $AppRouter extends _i12.RootStackRouter {
         routeData: routeData,
         child: _i2.AddLinePage(
           key: args.key,
-          line: args.line,
+          lineId: args.lineId,
+          lineName: args.lineName,
         ),
       );
     },
@@ -54,6 +59,7 @@ abstract class $AppRouter extends _i12.RootStackRouter {
         child: _i3.ClientsListPage(
           key: args.key,
           lineId: args.lineId,
+          lineName: args.lineName,
         ),
       );
     },
@@ -110,16 +116,40 @@ abstract class $AppRouter extends _i12.RootStackRouter {
 
 /// generated route for
 /// [_i1.AddClientPage]
-class AddClientRoute extends _i12.PageRouteInfo<void> {
-  const AddClientRoute({List<_i12.PageRouteInfo>? children})
-      : super(
+class AddClientRoute extends _i12.PageRouteInfo<AddClientRouteArgs> {
+  AddClientRoute({
+    _i13.Key? key,
+    String? lineId,
+    List<_i12.PageRouteInfo>? children,
+  }) : super(
           AddClientRoute.name,
+          args: AddClientRouteArgs(
+            key: key,
+            lineId: lineId,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'AddClientRoute';
 
-  static const _i12.PageInfo<void> page = _i12.PageInfo<void>(name);
+  static const _i12.PageInfo<AddClientRouteArgs> page =
+      _i12.PageInfo<AddClientRouteArgs>(name);
+}
+
+class AddClientRouteArgs {
+  const AddClientRouteArgs({
+    this.key,
+    this.lineId,
+  });
+
+  final _i13.Key? key;
+
+  final String? lineId;
+
+  @override
+  String toString() {
+    return 'AddClientRouteArgs{key: $key, lineId: $lineId}';
+  }
 }
 
 /// generated route for
@@ -127,13 +157,15 @@ class AddClientRoute extends _i12.PageRouteInfo<void> {
 class AddLineRoute extends _i12.PageRouteInfo<AddLineRouteArgs> {
   AddLineRoute({
     _i13.Key? key,
-    _i14.LineModel? line,
+    String? lineId,
+    String? lineName,
     List<_i12.PageRouteInfo>? children,
   }) : super(
           AddLineRoute.name,
           args: AddLineRouteArgs(
             key: key,
-            line: line,
+            lineId: lineId,
+            lineName: lineName,
           ),
           initialChildren: children,
         );
@@ -147,16 +179,19 @@ class AddLineRoute extends _i12.PageRouteInfo<AddLineRouteArgs> {
 class AddLineRouteArgs {
   const AddLineRouteArgs({
     this.key,
-    this.line,
+    this.lineId,
+    this.lineName,
   });
 
   final _i13.Key? key;
 
-  final _i14.LineModel? line;
+  final String? lineId;
+
+  final String? lineName;
 
   @override
   String toString() {
-    return 'AddLineRouteArgs{key: $key, line: $line}';
+    return 'AddLineRouteArgs{key: $key, lineId: $lineId, lineName: $lineName}';
   }
 }
 
@@ -166,12 +201,14 @@ class ClientsListRoute extends _i12.PageRouteInfo<ClientsListRouteArgs> {
   ClientsListRoute({
     _i13.Key? key,
     String? lineId,
+    String? lineName,
     List<_i12.PageRouteInfo>? children,
   }) : super(
           ClientsListRoute.name,
           args: ClientsListRouteArgs(
             key: key,
             lineId: lineId,
+            lineName: lineName,
           ),
           initialChildren: children,
         );
@@ -186,15 +223,18 @@ class ClientsListRouteArgs {
   const ClientsListRouteArgs({
     this.key,
     this.lineId,
+    this.lineName,
   });
 
   final _i13.Key? key;
 
   final String? lineId;
 
+  final String? lineName;
+
   @override
   String toString() {
-    return 'ClientsListRouteArgs{key: $key, lineId: $lineId}';
+    return 'ClientsListRouteArgs{key: $key, lineId: $lineId, lineName: $lineName}';
   }
 }
 

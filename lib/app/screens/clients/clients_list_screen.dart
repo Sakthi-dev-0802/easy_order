@@ -1,10 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
 import 'package:easy_order/app/screens/clients/providers/orders_provider.dart';
-import 'package:easy_order/app/screens/line/state/line_notifier.dart';
-import 'package:easy_order/app/screens/market_info/providers/market_provider.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/material_styles/app_text_style.dart';
 import 'package:easy_order/routes/app_routes.dart';
@@ -14,19 +11,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 @RoutePage()
 class ClientsListPage extends ConsumerWidget {
   final String? lineId;
-  const ClientsListPage({super.key, this.lineId});
+  final String? lineName;
+
+  const ClientsListPage({
+    super.key,
+    this.lineId,
+    this.lineName,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final clientsAsync = ref.watch(clientsProvider);
+    final clientsAsync = ref.watch(clientsByLineProvider(lineId ?? ''));
     final todayTotalOrdersAsync = ref.watch(todayTotalOrdersProvider);
-    final lineState = ref.watch(lineStateProvider);
 
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
         title: Text(
-          'Clients List',
+          lineName ?? 'Clients List',
           style: AppTextStyle.titleLargeLightWhite.copyWith(
             color: AppColor.textBlack,
           ),
@@ -35,110 +37,63 @@ class ClientsListPage extends ConsumerWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         actions: [
-          lineState.isLoading
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColor.buttonGreen,
-                  ),
-                )
-              : IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () async {
-                    if (lineId != null) {
-                      await ref
-                          .read(lineStateProvider.notifier)
-                          .getLineById(lineId!);
-                      if (lineState.line != null) {
-                        if (context.mounted) {
-                          if (lineState.error != null) {
-                            context.showErrorSnackBar(lineState.error!);
-                          } else {
-                            context.router.push(
-                                AppRoutes.addLinePage(line: lineState.line));
-                          }
-                        }
-                      }
-                    } else {
-                      context.showErrorSnackBar('Line ID is required');
-                    }
-                  },
-                ),
           IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              context.router.push(AppRoutes.addClientPage);
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              context.router.push(AppRoutes.addLinePage(
+                lineId: lineId,
+                lineName: lineName,
+              ));
             },
           ),
         ],
       ),
+      floatingActionButton: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF2196F3), // Material Blue
+              Color(0xFF298F05),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF298F05).withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            context.router.push(AppRoutes.addClientPage(lineId: lineId));
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+      ),
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: AppColor.buttonGreen.withOpacity(0.1),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.shopping_cart,
-                  color: AppColor.buttonGreen,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Today\'s Total Orders:',
-                  style: AppTextStyle.titleMediumDark,
-                ),
-                const SizedBox(width: 8),
-                todayTotalOrdersAsync.when(
-                  data: (total) => Text(
-                    '$total kg',
-                    style: AppTextStyle.titleMediumDark.copyWith(
-                      color: AppColor.buttonGreen,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  loading: () => const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColor.buttonGreen,
-                    ),
-                  ),
-                  error: (_, __) => Text(
-                    '0 kg',
-                    style: AppTextStyle.titleMediumDark.copyWith(
-                      color: AppColor.buttonGreen,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildHeroTotalBanner(todayTotalOrdersAsync),
           Expanded(
             child: clientsAsync.when(
               data: (clients) {
                 if (clients.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.people_outline,
-                          size: 64,
-                          color: AppColor.textDarkGray.withOpacity(0.5),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No clients found',
-                          style: AppTextStyle.titleMediumDark,
-                        ),
-                      ],
-                    ),
-                  );
+                  return _buildEmptyView();
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -177,6 +132,70 @@ class ClientsListPage extends ConsumerWidget {
       ),
     );
   }
+
+  Center _buildEmptyView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.people_outline,
+            size: 64,
+            color: AppColor.textDarkGray.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No clients found',
+            style: AppTextStyle.titleMediumDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroTotalBanner(AsyncValue<int> todayTotalOrdersAsync) =>
+      Container(
+        padding: const EdgeInsets.all(16),
+        color: AppColor.buttonGreen.withOpacity(0.1),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.shopping_cart,
+              color: AppColor.buttonGreen,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Today\'s Total Orders:',
+              style: AppTextStyle.titleMediumDark,
+            ),
+            const SizedBox(width: 8),
+            todayTotalOrdersAsync.when(
+              data: (total) => Text(
+                '$total kg',
+                style: AppTextStyle.titleMediumDark.copyWith(
+                  color: AppColor.buttonGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              loading: () => const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColor.buttonGreen,
+                ),
+              ),
+              error: (_, __) => Text(
+                '0 kg',
+                style: AppTextStyle.titleMediumDark.copyWith(
+                  color: AppColor.buttonGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
 class _ClientCard extends ConsumerWidget {

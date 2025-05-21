@@ -23,7 +23,6 @@ class _AddClientPageState extends ConsumerState<AddClientPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  // String? _selectedLineId;
 
   @override
   void dispose() {
@@ -35,11 +34,8 @@ class _AddClientPageState extends ConsumerState<AddClientPage> {
 
   Future<void> _handleSaveClient() async {
     if (_nameController.text.isNotEmpty &&
-            _phoneController.text.isNotEmpty &&
-            _addressController.text.isNotEmpty
-        // &&
-        // _selectedLineId != null
-        ) {
+        _phoneController.text.isNotEmpty &&
+        _addressController.text.isNotEmpty) {
       final marketId = UserMarketService.userMarket;
       if (marketId == null) {
         if (mounted) {
@@ -74,8 +70,6 @@ class _AddClientPageState extends ConsumerState<AddClientPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final linesAsync = ref.watch(linesProvider);
-
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
@@ -100,36 +94,6 @@ class _AddClientPageState extends ConsumerState<AddClientPage> {
               hintText: 'Enter phone number',
               keyboardType: TextInputType.phone,
             ),
-            // SizedBox(height: spacing16),
-            // linesAsync.when(
-            //   data: (lines) => CustomFormField.dropdown(
-            //     label: 'Select Line',
-            //     value: _selectedLineId,
-            //     items: lines.map((line) => line.lineId).toList(),
-            //     displayItems: lines.map((line) => line.lineName).toList(),
-            //     onChanged: (value) {
-            //       setState(() {
-            //         _selectedLineId = value;
-            //       });
-            //     },
-            //   ),
-            //   loading: () => const Center(
-            //     child: CircularProgressIndicator(
-            //       color: AppColor.buttonGreen,
-            //     ),
-            //   ),
-            //   error: (error, stackTrace) => CustomFormField.dropdown(
-            //     label: 'Select Line',
-            //     value: _selectedLineId,
-            //     items: const [],
-            //     displayItems: const [],
-            //     onChanged: (value) {
-            //       setState(() {
-            //         _selectedLineId = value;
-            //       });
-            //     },
-            //   ),
-            // ),
             SizedBox(height: spacing16),
             CustomFormField.text(
               label: 'Address',
@@ -137,38 +101,44 @@ class _AddClientPageState extends ConsumerState<AddClientPage> {
               hintText: 'Enter address',
             ),
             SizedBox(height: spacing32),
-            ElevatedButton(
-              onPressed: _handleSaveClient,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColor.buttonGreen,
-                padding: EdgeInsets.symmetric(vertical: spacing16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: ref.watch(clientStateProvider).isLoading
-                  ? const Center(
-                      child: SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: AppColor.backgroundWhite,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    )
-                  : const Text(
-                      'Save Client',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
+            _buildButton(),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildButton() => ElevatedButton(
+        onPressed: _handleSaveClient,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColor.buttonGreen,
+          padding: EdgeInsets.symmetric(vertical: spacing16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: ref.watch(clientStateProvider).isLoading
+            ? _buildCircularProgress()
+            : _buildButtonText(),
+      );
+
+  Widget _buildButtonText() => const Text(
+        'Save Client',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+
+  Widget _buildCircularProgress() => Center(
+        child: SizedBox(
+          height: size20,
+          width: size20,
+          child: const CircularProgressIndicator(
+            color: AppColor.backgroundWhite,
+            strokeWidth: 2,
+          ),
+        ),
+      );
 }

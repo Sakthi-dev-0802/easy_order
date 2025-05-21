@@ -2,6 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
 import 'package:easy_order/app/screens/clients/providers/orders_provider.dart';
+import 'package:easy_order/app/screens/clients/widgets/add_client_floating_button.dart';
+import 'package:easy_order/app/screens/clients/widgets/client_card.dart';
+import 'package:easy_order/app/screens/clients/widgets/quantity_hero_card.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/material_styles/app_text_style.dart';
 import 'package:easy_order/routes/app_routes.dart';
@@ -22,11 +25,72 @@ class ClientsListPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final clientsAsync = ref.watch(clientsByLineProvider(lineId ?? ''));
-    final todayTotalOrdersAsync = ref.watch(todayTotalOrdersProvider);
 
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
-      appBar: AppBar(
+      appBar: _buildAppBar(context),
+      floatingActionButton: AddClientFloatingButton(lineId: lineId),
+      body: Column(
+        children: [
+          const QuantityHeroCard(),
+          _buildBodayWidget(clientsAsync),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBodayWidget(AsyncValue<List<ClientModel>> clientsAsync) =>
+      Expanded(
+        child: clientsAsync.when(
+          data: (clients) {
+            if (clients.isEmpty) {
+              return _buildEmptyView();
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: clients.length,
+              itemBuilder: (context, index) {
+                final client = clients[index];
+                return ClientCard(client: client);
+              },
+            );
+          },
+          loading: () => _buildCircularProgress(),
+          error: (error, stackTrace) => _buildErrorWidget(),
+        ),
+      );
+
+  Widget _buildCircularProgress() => Center(
+        child: SizedBox(
+          width: size32,
+          height: size32,
+          child: const CircularProgressIndicator(
+            color: AppColor.buttonGreen,
+            strokeWidth: 2,
+            strokeCap: StrokeCap.round,
+          ),
+        ),
+      );
+
+  Widget _buildErrorWidget() => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: spacing16,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: size64,
+              color: AppColor.textDarkGray.withOpacity(0.5),
+            ),
+            Text(
+              'Error loading clients',
+              style: AppTextStyle.titleMediumDark,
+            ),
+          ],
+        ),
+      );
+
+  AppBar _buildAppBar(BuildContext context) => AppBar(
         title: Text(
           lineName ?? 'Clients List',
           style: AppTextStyle.titleLargeLightWhite.copyWith(
@@ -36,278 +100,37 @@ class ClientsListPage extends ConsumerWidget {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        forceMaterialTransparency: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () async {
-              context.router.push(AppRoutes.addLinePage(
-                lineId: lineId,
-                lineName: lineName,
-              ));
-            },
-          ),
+          _buildLineEditButton(context),
         ],
-      ),
-      floatingActionButton: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2196F3), // Material Blue
-              Color(0xFF298F05),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF298F05).withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () {
-            context.router.push(AppRoutes.addClientPage(lineId: lineId));
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
-            size: 28,
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          _buildHeroTotalBanner(todayTotalOrdersAsync),
-          Expanded(
-            child: clientsAsync.when(
-              data: (clients) {
-                if (clients.isEmpty) {
-                  return _buildEmptyView();
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: clients.length,
-                  itemBuilder: (context, index) {
-                    final client = clients[index];
-                    return _ClientCard(client: client);
-                  },
-                );
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(
-                  color: AppColor.buttonGreen,
-                ),
-              ),
-              error: (error, stackTrace) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: AppColor.textDarkGray.withOpacity(0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error loading clients',
-                      style: AppTextStyle.titleMediumDark,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+      );
 
-  Center _buildEmptyView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.people_outline,
-            size: 64,
-            color: AppColor.textDarkGray.withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No clients found',
-            style: AppTextStyle.titleMediumDark,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildLineEditButton(BuildContext context) => IconButton(
+        icon: const Icon(Icons.edit),
+        onPressed: () async {
+          context.router.push(AppRoutes.addLinePage(
+            lineId: lineId,
+            lineName: lineName,
+          ));
+        },
+      );
 
-  Widget _buildHeroTotalBanner(AsyncValue<int> todayTotalOrdersAsync) =>
-      Container(
-        padding: const EdgeInsets.all(16),
-        color: AppColor.buttonGreen.withOpacity(0.1),
-        child: Row(
+  Widget _buildEmptyView() => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: spacing16,
           children: [
-            const Icon(
-              Icons.shopping_cart,
-              color: AppColor.buttonGreen,
+            Icon(
+              Icons.people_outline,
+              size: size64,
+              color: AppColor.textDarkGray.withOpacity(0.5),
             ),
-            const SizedBox(width: 8),
             Text(
-              'Today\'s Total Orders:',
+              'No clients found',
               style: AppTextStyle.titleMediumDark,
-            ),
-            const SizedBox(width: 8),
-            todayTotalOrdersAsync.when(
-              data: (total) => Text(
-                '$total kg',
-                style: AppTextStyle.titleMediumDark.copyWith(
-                  color: AppColor.buttonGreen,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              loading: () => const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColor.buttonGreen,
-                ),
-              ),
-              error: (_, __) => Text(
-                '0 kg',
-                style: AppTextStyle.titleMediumDark.copyWith(
-                  color: AppColor.buttonGreen,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
             ),
           ],
         ),
       );
-}
-
-class _ClientCard extends ConsumerWidget {
-  final ClientModel client;
-
-  const _ClientCard({required this.client});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(clientOrdersProvider(client.uid));
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 0,
-      color: AppColor.backgroundWhite,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radius08),
-        side: const BorderSide(
-          color: AppColor.borderMutedGray,
-          width: 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColor.buttonGreen.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(radius08),
-              ),
-              child: const Icon(
-                Icons.store,
-                color: AppColor.buttonGreen,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    client.name,
-                    style: AppTextStyle.titleLargeLightWhite.copyWith(
-                      color: AppColor.textBlack,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    client.phone,
-                    style: AppTextStyle.bodyLargeBoldDark,
-                  ),
-                  Text(
-                    client.address,
-                    style: AppTextStyle.bodyLargeBoldDark,
-                  ),
-                ],
-              ),
-            ),
-            ordersAsync.when(
-              data: (orders) {
-                final totalQuantity = orders.fold<int>(
-                  0,
-                  (sum, order) => sum + order.quantity,
-                );
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColor.buttonGreen.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(radius08),
-                  ),
-                  child: Text(
-                    '$totalQuantity kg',
-                    style: AppTextStyle.bodyLargeBoldDark.copyWith(
-                      color: AppColor.buttonGreen,
-                    ),
-                  ),
-                );
-              },
-              loading: () => const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColor.buttonGreen,
-                ),
-              ),
-              error: (_, __) => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColor.buttonGreen.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(radius08),
-                ),
-                child: Text(
-                  '0 kg',
-                  style: AppTextStyle.bodyLargeBoldDark.copyWith(
-                    color: AppColor.buttonGreen,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

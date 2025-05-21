@@ -1,6 +1,11 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_order/app/common_widgets/line_card.dart';
+import 'package:easy_order/app/constants/constants.dart';
+import 'package:easy_order/app/firebase_services/model/line_model.dart';
 import 'package:easy_order/app/screens/line/providers/lines_provider.dart';
+import 'package:easy_order/app/screens/line/widgets/add_line_floating_button.dart';
 import 'package:easy_order/material_styles/app_color.dart';
+import 'package:easy_order/material_styles/app_text_style.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,159 +14,60 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class LinePage extends ConsumerWidget {
   const LinePage({super.key});
 
+  void _onLineTap(BuildContext context, LineModel line) =>
+      context.router.navigate(
+        AppRoutes.clientsListPage(
+          line.lineId,
+          line.lineName,
+        ),
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final linesAsync = ref.watch(linesProvider);
+    final linesAsync = ref.watch(allLinesProvider);
 
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
-      appBar: AppBar(
-        title: const Text('Select Line'),
-        elevation: 0,
-      ),
+      appBar: _buildAppBar(),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(spacing16),
         child: linesAsync.when(
-          data: (lines) => lines.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No Lines Available',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey,
-                    ),
-                  ),
-                )
-              : GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 1.0,
-                  ),
-                  itemCount: lines.length,
-                  itemBuilder: (context, index) {
-                    return LineCard(
-                      lineName: lines[index].lineName,
-                      onTap: () {
-                        context.router.navigate(
-                          AppRoutes.clientsListPage(
-                            lines[index].lineId,
-                            lines[index].lineName,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+          data: (lines) =>
+              lines.isEmpty ? _buildEmtyListView() : _buildLines(lines),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stackTrace) => Center(
             child: Text('Error: $error'),
           ),
         ),
       ),
-      floatingActionButton: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2196F3), // Material Blue
-              Color(0xFF298F05),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF298F05).withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () {
-            context.router.navigate(AppRoutes.addLinePage());
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
-            size: 28,
-          ),
-        ),
-      ),
+      floatingActionButton: const AddLineFloatingButton(),
     );
   }
-}
 
-class LineCard extends StatelessWidget {
-  final String lineName;
-  final VoidCallback onTap;
-
-  const LineCard({
-    super.key,
-    required this.lineName,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2196F3), // Material Blue
-                Color(0xFF298F05),
-              ],
-            ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.line_axis,
-                  size: 48,
-                  color: Colors.white,
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    lineName,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+  Widget _buildLines(List<LineModel> lines) => GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: spacing16,
+          mainAxisSpacing: spacing16,
         ),
-      ),
-    );
-  }
+        itemCount: lines.length,
+        itemBuilder: (context, index) => LineCard(
+          lineName: lines[index].lineName,
+          onTap: () => _onLineTap(context, lines[index]),
+        ),
+      );
+
+  Widget _buildEmtyListView() => Center(
+        child: Text(
+          'No Lines Available',
+          style: AppTextStyle.titleMediumDark
+              .copyWith(fontWeight: FontWeight.w500),
+        ),
+      );
+
+  AppBar _buildAppBar() => AppBar(
+        title: const Text('Select Line'),
+        elevation: 0,
+        forceMaterialTransparency: true,
+      );
 }

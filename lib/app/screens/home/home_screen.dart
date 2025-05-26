@@ -30,7 +30,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    startDate = DateTime.now().toCalanderDate().toUTCFormat();
+    startDate = DateTime.now().toLocal().toYearFormat();
     endDate = null;
   }
 
@@ -38,14 +38,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     setState(() {
       if (dateRange != null) {
         selectedDateRange = dateRange;
-        startDate = selectedDateRange!.start.toUTCFormat();
-
+        startDate = selectedDateRange!.start.toLocal().toYearFormat();
         endDate = selectedDateRange!.end == selectedDateRange!.start
-            ? DateTime.now().toUTCFormat()
+            ? DateTime.now().toLocal().toYearFormat()
             : selectedDateRange!.end
                 .add(const Duration(days: 1))
                 .subtract(const Duration(milliseconds: 1))
-                .toUTCFormat();
+                .toLocal()
+                .toYearFormat();
       }
     });
   }

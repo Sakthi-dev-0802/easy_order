@@ -1,3 +1,6 @@
+import 'package:easy_order/app/constants/radius_constant.dart';
+import 'package:easy_order/app/constants/spacing_constant.dart';
+import 'package:easy_order/material_styles/material_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
@@ -37,7 +40,7 @@ class CustomDateRangePickerDialog extends StatelessWidget {
             allowSingleTapDaySelection: true,
             height: 400,
             theme: const CalendarTheme(
-              selectedColor: Colors.blue,
+              selectedColor: Color(0xFF298F05),
               dayNameTextStyle: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -46,7 +49,7 @@ class CustomDateRangePickerDialog extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
-              inRangeColor: Colors.blueAccent,
+              inRangeColor: Color(0xFF2196F3),
               inRangeTextStyle: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -57,7 +60,7 @@ class CustomDateRangePickerDialog extends StatelessWidget {
               ),
               todayTextStyle: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.red,
+                color: Color(0xFF298F05),
               ),
               defaultTextStyle: TextStyle(
                 fontWeight: FontWeight.normal,
@@ -77,14 +80,34 @@ class CustomDateRangePickerDialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: const Text("Cancel"),
+          child: Text(
+            "Cancel",
+            style: AppTextStyle.bodyLargeBoldDark,
+          ),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColor.buttonGreen,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing24,
+              vertical: spacing12,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                radius12,
+              ),
+            ),
+            elevation: 2,
+          ),
           onPressed: () {
             onDateRangeChanged(selectedDate);
             Navigator.of(context).pop();
           },
-          child: const Text("Confirm"),
+          child: Text("Confirm",
+              style: AppTextStyle.bodyLargeBoldDark.copyWith(
+                color: AppColor.textWhite,
+              )),
         ),
       ],
     );

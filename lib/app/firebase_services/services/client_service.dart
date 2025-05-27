@@ -11,14 +11,23 @@ class ClientService with FirestoreService {
   static final CollectionReference _clientsCollection =
       _firestore.collection('clients');
 
-  Stream<List<ClientModel>> getClientsByMarketId(String marketId) {
+//TODO: Need to change to Future
+  Stream<List<ClientModel>> getClients(
+    String marketId, {
+    String? lineId,
+  }) {
     return _clientsCollection
         .where('marketId', isEqualTo: marketId)
+        .where('lineId', isEqualTo: lineId)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
           .map((doc) => ClientModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
     });
+  }
+
+  Future<void> createClient(ClientModel client) async {
+    await _clientsCollection.doc(client.uid).set(client.toMap());
   }
 }

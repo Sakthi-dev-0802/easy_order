@@ -15,5 +15,5 @@ final clientsProvider = StreamProvider<List<ClientModel>>((ref) {
   final marketId = UserMarketService.userMarket;
   if (marketId == null) return Stream.value([]);
 
-  return ClientService.instance.getClientsByMarketId(marketId);
+  return ClientService.instance.getClients(marketId);
 });

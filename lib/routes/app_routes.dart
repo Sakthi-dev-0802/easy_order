@@ -24,4 +24,15 @@ class AppRoutes {
 
   //Landing Route
   static get landing => const LandingRoute();
+
+  //Add Line Route
+  static addLinePage({String? lineId, String? lineName}) =>
+      AddLineRoute(lineId: lineId, lineName: lineName);
+
+  //Clients List Route
+  static clientsListPage(String lineId, String lineName) =>
+      ClientsListRoute(lineId: lineId, lineName: lineName);
+
+  //Add Client Route
+  static addClientPage({String? lineId}) => AddClientRoute(lineId: lineId);
 }

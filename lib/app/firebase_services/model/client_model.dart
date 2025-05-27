@@ -4,6 +4,7 @@ class ClientModel {
   final String name;
   final String phone;
   final String marketId;
+  final String address;
 
   ClientModel({
     required this.uid,
@@ -11,6 +12,7 @@ class ClientModel {
     required this.name,
     required this.phone,
     required this.marketId,
+    required this.address,
   });
 
   factory ClientModel.fromMap(Map<String, dynamic> data) {
@@ -20,6 +22,7 @@ class ClientModel {
       name: data['name'] ?? '',
       phone: data['phone'] ?? '',
       marketId: data['marketId'] ?? '',
+      address: data['address'] ?? '',
     );
   }
 
@@ -30,6 +33,7 @@ class ClientModel {
       'name': name,
       'phone': phone,
       'marketId': marketId,
+      'address': address,
     };
   }
 }

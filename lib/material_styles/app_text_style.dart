@@ -39,6 +39,11 @@ class AppTextStyle {
     color: AppColor.textWhite,
   );
 
+  static final TextStyle titleLargeDark = GoogleFonts.inter(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: AppColor.textDarkGray,
+  );
   // Subheading Text
   // 20, 21, 22, 23, 24
   // static final TextStyle subHeadingLargeBlack = GoogleFonts.inter(

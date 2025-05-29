@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_order/app/screens/line/line_screen.dart';
+import 'package:easy_order/app/common_widgets/line_card.dart';
 import 'package:easy_order/app/screens/line/providers/lines_provider.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ class LinesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final linesAsync = ref.watch(linesProvider);
+    final linesAsync = ref.watch(allLinesProvider);
 
     return linesAsync.when(
       data: (lines) => lines.isEmpty
@@ -38,7 +38,10 @@ class LinesList extends ConsumerWidget {
                 return LineCard(
                   lineName: "Line${index + 1}",
                   onTap: () {
-                    context.router.navigate(AppRoutes.clientsListPage);
+                    context.router.navigate(AppRoutes.clientsListPage(
+                      lines[index].lineId,
+                      lines[index].lineName,
+                    ));
                   },
                 );
               },

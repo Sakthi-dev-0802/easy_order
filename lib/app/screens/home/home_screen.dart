@@ -61,6 +61,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             loading: () => const Text('Loading...'),
             error: (err, stack) => const Text('Error'),
           ),
+          forceMaterialTransparency: true,
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16.0),

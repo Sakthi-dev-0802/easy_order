@@ -1,8 +1,10 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
 import 'package:easy_order/app/screens/clients/providers/orders_provider.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/material_styles/app_text_style.dart';
+import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,37 +17,40 @@ class ClientCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(clientOrdersProvider(client.uid));
 
-    return Card(
-      margin: EdgeInsets.only(bottom: spacing16),
-      elevation: 0,
-      color: AppColor.backgroundWhite,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radius08),
-        side: const BorderSide(
-          color: AppColor.borderMutedGray,
-          width: 1,
+    return GestureDetector(
+      onTap: () => context.router.navigate(AppRoutes.orderTakingPage(client)),
+      child: Card(
+        margin: EdgeInsets.only(bottom: spacing16),
+        elevation: 0,
+        color: AppColor.backgroundWhite,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius08),
+          side: const BorderSide(
+            color: AppColor.borderMutedGray,
+            width: 1,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing16),
-        child: Row(
-          children: [
-            _buildStoreIcon(),
-            SizedBox(width: spacing16),
-            _buildClientDetail(),
-            ordersAsync.when(
-              data: (orders) {
-                final totalQuantity = orders.fold<int>(
-                  0,
-                  (sum, order) => sum + order.quantity,
-                );
+        child: Padding(
+          padding: EdgeInsets.all(spacing16),
+          child: Row(
+            children: [
+              _buildStoreIcon(),
+              SizedBox(width: spacing16),
+              _buildClientDetail(),
+              ordersAsync.when(
+                data: (orders) {
+                  final totalQuantity = orders.fold<int>(
+                    0,
+                    (sum, order) => sum + order.quantity,
+                  );
 
-                return _buildQuantity(totalQuantity);
-              },
-              loading: () => _buildCircularProgress(),
-              error: (_, __) => _buildErrorWidget(),
-            ),
-          ],
+                  return _buildQuantity(totalQuantity);
+                },
+                loading: () => _buildCircularProgress(),
+                error: (_, __) => _buildErrorWidget(),
+              ),
+            ],
+          ),
         ),
       ),
     );

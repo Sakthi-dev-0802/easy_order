@@ -53,5 +53,9 @@ class AppRouter extends $AppRouter {
       page: AddClientRoute.page,
       path: '/addclient',
     ),
+    AutoRoute(
+      page: OrderTakingRoute.page,
+      path: '/ordertaking',
+    ),
   ];
 }

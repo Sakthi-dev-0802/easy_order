@@ -119,4 +119,3 @@ class _AddLinePageState extends ConsumerState<AddLinePage> {
         ),
       );
 }
-

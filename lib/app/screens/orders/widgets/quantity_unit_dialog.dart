@@ -155,7 +155,7 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
       child: Row(
         children: [
           SizedBox(
-            width: 200,
+            width: 150,
             child: Text(
               label,
               style: const TextStyle(

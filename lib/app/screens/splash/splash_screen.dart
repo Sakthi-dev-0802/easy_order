@@ -42,6 +42,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: CircularProgressIndicator(
           color: AppColor.buttonGreen,

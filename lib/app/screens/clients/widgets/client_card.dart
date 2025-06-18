@@ -15,7 +15,7 @@ class ClientCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(clientOrdersProvider(client.uid));
+    final ordersAsync = ref.watch(todayTotalOrderByClientProvider(client.uid));
 
     return GestureDetector(
       onTap: () => context.router.navigate(AppRoutes.orderTakingPage(client)),
@@ -38,12 +38,7 @@ class ClientCard extends ConsumerWidget {
               SizedBox(width: spacing16),
               _buildClientDetail(),
               ordersAsync.when(
-                data: (orders) {
-                  final totalQuantity = orders.fold<int>(
-                    0,
-                    (sum, order) => sum + order.quantity,
-                  );
-
+                data: (totalQuantity) {
                   return _buildQuantity(totalQuantity);
                 },
                 loading: () => _buildCircularProgress(),

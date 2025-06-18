@@ -10,8 +10,9 @@ final clientOrdersProvider =
   return OrderService.instance.getTodayOrdersByClientId(clientId);
 });
 
-final todayTotalOrdersProvider = StreamProvider<int>((ref) {
-  return OrderService.instance.getTodayTotalOrders();
+final todayTotalOrdersProvider =
+    StreamProvider.family<int, String>((ref, lineId) {
+  return OrderService.instance.getTodayTotalOrders(lineId);
 });
 
 final clientsByLineProvider =

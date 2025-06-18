@@ -30,22 +30,20 @@ class OrderService with FirestoreService {
     });
   }
 
-  Stream<int> getTodayTotalOrders() {
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+  Stream<int> getTodayTotalOrders(String lineId) {
+    // final now = DateTime.now();
+    // final startOfDay = DateTime(now.year, now.month, now.day);
+    // final endOfDay = startOfDay.add(const Duration(days: 1));
 
     return _ordersCollection
-        .where('orderDate',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay))
+        .where('lineId', isEqualTo: lineId)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.fold<int>(
         0,
-        (sum, doc) {
+        (sums, doc) {
           final order = OrderModel.fromMap(doc.data() as Map<String, dynamic>);
-          return sum + order.quantity;
+          return sums + order.quantity;
         },
       );
     });

@@ -32,7 +32,7 @@ class ClientsListPage extends ConsumerWidget {
       floatingActionButton: AddClientFloatingButton(lineId: lineId),
       body: Column(
         children: [
-          const QuantityHeroCard(),
+          QuantityHeroCard(lineId: lineId ?? ''),
           _buildBodayWidget(clientsAsync),
         ],
       ),

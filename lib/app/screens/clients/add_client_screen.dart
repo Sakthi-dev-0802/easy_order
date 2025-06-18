@@ -4,7 +4,7 @@ import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
 import 'package:easy_order/app/screens/clients/state/client_notifier.dart';
-import 'package:easy_order/core/utils/user_market_service.dart';
+import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +36,7 @@ class _AddClientPageState extends ConsumerState<AddClientPage> {
     if (_nameController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
         _addressController.text.isNotEmpty) {
-      final marketId = UserMarketService.userMarket;
+      final marketId = ref.watch(userMarketProvider.notifier).state;
       if (marketId == null) {
         if (mounted) {
           context.showErrorSnackBar('Market ID not found. Please try again.');
@@ -73,6 +73,7 @@ class _AddClientPageState extends ConsumerState<AddClientPage> {
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
+        backgroundColor: AppColor.backgroundWhite,
         title: const Text('Add New Client'),
         elevation: 0,
       ),

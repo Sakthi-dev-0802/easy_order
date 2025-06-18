@@ -7,7 +7,7 @@ import 'package:easy_order/app/screens/login/providers/markets_provider.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
 import 'package:easy_order/core/storage/app_storage.dart';
-import 'package:easy_order/core/utils/user_market_service.dart';
+import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,7 +59,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       final user = ref.watch(loginStateProvider).user;
       if (user != null) {
         await AppStorage.saveUser(user);
-        UserMarketService.setUserMarket(user.marketId);
+        ref.read(userMarketProvider.notifier).state = user.marketId;
         if (mounted) {
           context.router.replace(AppRoutes.landing);
         }

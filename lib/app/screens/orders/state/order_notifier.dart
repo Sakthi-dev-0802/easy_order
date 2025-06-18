@@ -1,12 +1,15 @@
 import 'package:easy_order/app/firebase_services/model/items_model.dart';
 import 'package:easy_order/app/firebase_services/model/line_model.dart';
 import 'package:easy_order/app/firebase_services/model/market_model.dart';
+import 'package:easy_order/app/firebase_services/model/order_model.dart';
 import 'package:easy_order/app/firebase_services/model/user_model.dart';
 import 'package:easy_order/app/firebase_services/services/items_service.dart';
+import 'package:easy_order/app/firebase_services/services/order_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class OrderStateState {
   final bool isLoading;
+  final bool isCreatingOrder;
   final String? error;
   final LineModel? line;
   final List<ItemsModel>? items;
@@ -14,6 +17,7 @@ class OrderStateState {
 
   OrderStateState({
     this.isLoading = false,
+    this.isCreatingOrder = false,
     this.error,
     this.line,
     this.items,
@@ -22,7 +26,7 @@ class OrderStateState {
 
   OrderStateState copyWith({
     bool? isLoading,
-    bool? isDeleting,
+    bool? isCreatingOrder,
     String? error,
     bool? isLoggedIn,
     UserModel? user,
@@ -33,6 +37,7 @@ class OrderStateState {
   }) {
     return OrderStateState(
       isLoading: isLoading ?? this.isLoading,
+      isCreatingOrder: isCreatingOrder ?? this.isCreatingOrder,
       error: error ?? this.error,
       line: line ?? this.line,
       items: items ?? this.items,
@@ -84,6 +89,16 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
       items: updatedItems,
       originalItems: updatedOriginalItems,
     );
+  }
+
+  Future<void> createOrder(OrderModel order) async {
+    try {
+      state = state.copyWith(isCreatingOrder: true);
+      await OrderService.instance.createOrder(order);
+      state = state.copyWith(isCreatingOrder: false);
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isCreatingOrder: false);
+    }
   }
 }
 

@@ -175,12 +175,16 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
         throw Exception('User not found');
       }
 
+      final totalQuantity = markedItems
+          .map((item) => item.quantity ?? 0)
+          .fold(0, (sum, quantity) => sum + quantity);
+
       final order = OrderModel(
         uid: const Uuid().v4(),
         clientId: widget.client.uid,
         lineId: widget.client.lineId,
         marketId: widget.client.marketId,
-        quantity: markedItems.length,
+        quantity: totalQuantity,
         orderDate: DateTime.now(),
         items: markedItems,
       );

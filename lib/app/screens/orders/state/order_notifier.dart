@@ -65,29 +65,38 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
     }
   }
 
-  void updateItem(int index, int quantity, int noOfPack, String packType) {
+  void updateItem(
+      int index, int quantity, int noOfPack, String packType, bool isRemoved) {
     if (state.items == null || index >= state.items!.length) return;
 
     final updatedItems = List<ItemsModel>.from(state.items!);
-    final updatedOriginalItems = List<ItemsModel>.from(state.originalItems!);
+    // final updatedOriginalItems = List<ItemsModel>.from(state.originalItems!);
 
-    updatedItems[index] = updatedItems[index].copyWith(
-      quantity: quantity,
-      noOfPack: noOfPack,
-      packingType: packType,
-      markedForOrder: true,
-    );
+    if (isRemoved) {
+      updatedItems[index] = updatedItems[index].copyWith(
+        quantity: 0,
+        noOfPack: 0,
+        markedForOrder: false,
+      );
+    } else {
+      updatedItems[index] = updatedItems[index].copyWith(
+        quantity: quantity,
+        noOfPack: noOfPack,
+        packingType: packType,
+        markedForOrder: true,
+      );
+    }
 
-    updatedOriginalItems[index] = updatedOriginalItems[index].copyWith(
-      quantity: quantity,
-      noOfPack: noOfPack,
-      packingType: packType,
-      markedForOrder: true,
-    );
+    // updatedOriginalItems[index] = updatedOriginalItems[index].copyWith(
+    //   quantity: quantity,
+    //   noOfPack: noOfPack,
+    //   packingType: packType,
+    //   markedForOrder: true,
+    // );
 
     state = state.copyWith(
       items: updatedItems,
-      originalItems: updatedOriginalItems,
+      // originalItems: updatedOriginalItems,
     );
   }
 
@@ -99,6 +108,11 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
     } catch (e) {
       state = state.copyWith(error: e.toString(), isCreatingOrder: false);
     }
+  }
+
+  Future<ItemsModel> getDefaultOfItem(String itemId) async {
+    final item = await ItemsService.instance.getDefaultOfItem(itemId);
+    return item;
   }
 }
 

@@ -10,11 +10,18 @@ class ItemsService with FirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final CollectionReference _itemsCollection =
       _firestore.collection('items');
+  static final CollectionReference _itemDefaultsCollection =
+      _firestore.collection('itemsDefaultValue');
 
   Future<List<ItemsModel>> getAllItems() async {
     final snapshot = await _itemsCollection.get();
     return snapshot.docs
         .map((doc) => ItemsModel.fromMap(doc.data() as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<ItemsModel> getDefaultOfItem(String itemId) async {
+    final snapshot = await _itemDefaultsCollection.doc(itemId).get();
+    return ItemsModel.fromMap(snapshot.data() as Map<String, dynamic>);
   }
 }

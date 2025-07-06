@@ -7,11 +7,17 @@ import 'package:flutter/material.dart';
 
 class QuantityUnitDialog extends StatefulWidget {
   final ItemsModel item;
-  final Function(int quantity, int noOfPack, String packType) onConfirm;
+  final bool isAlreadyAdded;
+  final Function(
+      {int? quantity,
+      int? noOfPack,
+      String? packType,
+      bool? isRemoved}) onConfirm;
 
   const QuantityUnitDialog({
     super.key,
     required this.item,
+    required this.isAlreadyAdded,
     required this.onConfirm,
   });
 
@@ -31,7 +37,7 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
     _noOfPackController = TextEditingController();
     _quantityController.text = (widget.item.quantity ?? 0).toString();
     _selectedPackType = (widget.item.packType ?? 'BOX');
-    _noOfPackController.text = '1';
+    _noOfPackController.text = (widget.item.noOfPack ?? 1).toString();
   }
 
   @override
@@ -75,6 +81,18 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
                     ],
                   ),
                 ),
+                SizedBox(height: spacing16),
+                if (widget.isAlreadyAdded)
+                  IconButton(
+                    onPressed: () {
+                      widget.onConfirm(isRemoved: true);
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                  ),
                 SizedBox(height: spacing16),
                 _buildInputField(
                   label: 'Quantity (kg)',
@@ -124,7 +142,12 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
                             int.tryParse(_quantityController.text) ?? 0;
                         final noOfPack =
                             int.tryParse(_noOfPackController.text) ?? 0;
-                        widget.onConfirm(quantity, noOfPack, _selectedPackType);
+                        widget.onConfirm(
+                          quantity: quantity,
+                          noOfPack: noOfPack,
+                          packType: _selectedPackType,
+                          isRemoved: false,
+                        );
                         Navigator.of(context).pop();
                       },
                       child: Text(

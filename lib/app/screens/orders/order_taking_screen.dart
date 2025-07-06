@@ -4,6 +4,7 @@ import 'package:easy_order/app/constants/radius_constant.dart';
 import 'package:easy_order/app/constants/sizing_constant.dart';
 import 'package:easy_order/app/constants/spacing_constant.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
+import 'package:easy_order/app/firebase_services/model/items_model.dart';
 import 'package:easy_order/app/firebase_services/model/order_model.dart';
 import 'package:easy_order/app/screens/orders/state/order_notifier.dart';
 import 'package:easy_order/app/screens/orders/widgets/item_card.dart';
@@ -48,6 +49,7 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
                 : Column(
                     children: [
                       _buildContent(orderState),
+                      // Need to change as per the order update flow
                       if (orderState.items
                               ?.any((item) => item.markedForOrder == true) ??
                           false)
@@ -106,24 +108,35 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
               return const Text('No items found');
             }
             final item = orderState.items?[index];
-            final originalItems = orderState.originalItems?[index];
 
             return GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => QuantityUnitDialog(
-                    item: originalItems!,
-                    onConfirm: (quantity, noOfPack, packType) {
-                      ref.read(orderStateStateProvider.notifier).updateItem(
-                            index,
-                            quantity,
-                            noOfPack,
-                            packType,
-                          );
-                    },
-                  ),
-                );
+              onTap: () async {
+                ItemsModel? detailedItem;
+                if (item?.markedForOrder == true) {
+                  detailedItem = item;
+                } else {
+                  detailedItem = await ref
+                      .read(orderStateStateProvider.notifier)
+                      .getDefaultOfItem(item?.uid ?? '');
+                }
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => QuantityUnitDialog(
+                      item: detailedItem!,
+                      isAlreadyAdded: item?.markedForOrder == true,
+                      onConfirm: ({quantity, noOfPack, packType, isRemoved}) {
+                        ref.read(orderStateStateProvider.notifier).updateItem(
+                              index,
+                              quantity ?? 0,
+                              noOfPack ?? 0,
+                              packType ?? '',
+                              isRemoved ?? false,
+                            );
+                      },
+                    ),
+                  );
+                }
               },
               child: ItemCard(item: item),
             );

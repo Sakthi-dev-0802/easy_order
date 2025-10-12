@@ -1,3 +1,4 @@
+import 'package:easy_order/core/storage/app_storage.dart';
 import 'package:easy_order/firebase_options.dart';
 import 'package:easy_order/routes/router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +10,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await AppStorage.initialAppRunCheck();
   runApp(
     ProviderScope(
       child: MyApp(),

@@ -6,11 +6,9 @@
 *.swp
 .DS_Store
 .atom/
-.build/
 .buildlog/
 .history
 .svn/
-.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -32,9 +30,8 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
+pubspec.lock
 /build/
-# Ignore configure_fingerprint.bin
-**/configure_fingerprint.bin
 
 # Flutter specific ignores
 *.dart_tool/
@@ -54,6 +51,7 @@ android/gradle-wrapper.properties
 *.g.dart
 *.gr.dart
 *.freezed.dart
+*.gen.dart
 
 # Symbolication related
 app.*.symbols
@@ -65,4 +63,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-/assettracker_flutter/lib/gen
+
+# FVM Version Cache
+.fvm/
+.fvmrc

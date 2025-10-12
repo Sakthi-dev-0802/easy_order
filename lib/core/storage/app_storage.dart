@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:easy_order/app/firebase_services/model/user_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppStorage {
+  /// Save a string value to SharedPreferences
+
   AppStorage._internal();
 
   static final AppStorage _instance = AppStorage._internal();
@@ -13,6 +16,16 @@ class AppStorage {
   }
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  static Future<void> initialAppRunCheck() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasRunBefore = prefs.getBool('hasRunBefore') ?? false;
+
+    if (!hasRunBefore) {
+      await clearUser();
+      await prefs.setBool('hasRunBefore', true);
+    }
+  }
 
   static Future<void> saveUser(UserModel user) async {
     String jsonString = json.encode(user.toMap());

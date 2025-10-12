@@ -11,7 +11,6 @@ class ClientService with FirestoreService {
   static final CollectionReference _clientsCollection =
       _firestore.collection('clients');
 
-//TODO: Need to change to Future
   Stream<List<ClientModel>> getClients(
     String marketId, {
     String? lineId,

@@ -205,6 +205,7 @@ class _CustomFormFieldState extends State<CustomFormField> {
   Widget _buildDropdownField() {
     return DropdownButtonFormField<String>(
       value: widget.value,
+      dropdownColor: AppColor.backgroundWhite,
       items: List.generate(
         widget.items.length,
         (index) => DropdownMenuItem<String>(

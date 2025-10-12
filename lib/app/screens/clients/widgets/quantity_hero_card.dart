@@ -7,13 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class QuantityHeroCard extends ConsumerWidget {
+  final String lineId;
   const QuantityHeroCard({
     super.key,
+    required this.lineId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todayTotalOrdersAsync = ref.watch(todayTotalOrdersProvider);
+    final todayTotalOrdersAsync = ref.watch(todayTotalOrdersProvider(lineId));
 
     return Container(
       padding: EdgeInsets.all(spacing16),

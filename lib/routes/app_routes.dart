@@ -1,3 +1,4 @@
+import 'package:easy_order/app/firebase_services/model/client_model.dart';
 import 'package:easy_order/routes/router.gr.dart';
 
 class AppRoutes {
@@ -35,4 +36,8 @@ class AppRoutes {
 
   //Add Client Route
   static addClientPage({String? lineId}) => AddClientRoute(lineId: lineId);
+
+  //Order Taking Route
+  static orderTakingPage(ClientModel client) =>
+      OrderTakingRoute(client: client);
 }

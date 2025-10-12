@@ -2,7 +2,7 @@ import 'package:easy_order/app/firebase_services/model/line_model.dart';
 import 'package:easy_order/app/firebase_services/model/market_model.dart';
 import 'package:easy_order/app/firebase_services/model/user_model.dart';
 import 'package:easy_order/app/firebase_services/services/line_service.dart';
-import 'package:easy_order/core/utils/user_market_service.dart';
+import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -38,12 +38,16 @@ class LineState {
 }
 
 class LineStateNotifier extends StateNotifier<LineState> {
-  LineStateNotifier() : super(LineState());
+  final Ref ref;
+
+  LineStateNotifier(this.ref) : super(LineState());
 
   Future<void> createLine(String lineName) async {
     try {
       state = state.copyWith(isLoading: true);
-      final marketId = UserMarketService.userMarket ?? '';
+      final marketId = ref.read(userMarketProvider);
+      if (marketId == null) throw Exception('No market selected');
+
       final lineId = const Uuid().v4();
       final newLine = LineModel(
         lineId: lineId,
@@ -60,7 +64,9 @@ class LineStateNotifier extends StateNotifier<LineState> {
   Future<void> updateLine(String lineId, String lineName) async {
     try {
       state = state.copyWith(isLoading: true);
-      final marketId = UserMarketService.userMarket ?? '';
+      final marketId = ref.read(userMarketProvider);
+      if (marketId == null) throw Exception('No market selected');
+
       final updatedLine = LineModel(
         lineId: lineId,
         lineName: lineName,
@@ -96,5 +102,5 @@ class LineStateNotifier extends StateNotifier<LineState> {
 
 final lineStateProvider =
     StateNotifierProvider<LineStateNotifier, LineState>((ref) {
-  return LineStateNotifier();
+  return LineStateNotifier(ref);
 });

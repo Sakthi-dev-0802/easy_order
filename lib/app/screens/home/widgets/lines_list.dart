@@ -33,14 +33,15 @@ class LinesList extends ConsumerWidget {
                 mainAxisSpacing: 16.0,
                 childAspectRatio: 1.0,
               ),
-              itemCount: 5,
+              itemCount: lines.length,
               itemBuilder: (context, index) {
+                final line = lines[index];
                 return LineCard(
-                  lineName: "Line${index + 1}",
+                  lineName: line.lineName,
                   onTap: () {
                     context.router.navigate(AppRoutes.clientsListPage(
-                      lines[index].lineId,
-                      lines[index].lineName,
+                      line.lineId,
+                      line.lineName,
                     ));
                   },
                 );

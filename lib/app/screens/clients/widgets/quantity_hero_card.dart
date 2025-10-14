@@ -1,5 +1,6 @@
 import 'package:easy_order/app/constants/sizing_constant.dart';
 import 'package:easy_order/app/constants/spacing_constant.dart';
+import 'package:easy_order/app/providers/date_selection_provider.dart';
 import 'package:easy_order/app/screens/clients/providers/orders_provider.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/material_styles/app_text_style.dart';
@@ -15,7 +16,11 @@ class QuantityHeroCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todayTotalOrdersAsync = ref.watch(todayTotalOrdersProvider(lineId));
+    final globalDate = ref.watch(dateSelectionProvider);
+    final todayTotalOrdersAsync = ref.watch(todayTotalOrdersProvider((
+      lineId: lineId,
+      start: globalDate,
+    )));
 
     return Container(
       padding: EdgeInsets.all(spacing16),

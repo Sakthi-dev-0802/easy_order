@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
+import 'package:easy_order/app/providers/date_selection_provider.dart';
 import 'package:easy_order/app/screens/clients/providers/orders_provider.dart';
 import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/material_styles/app_text_style.dart';
@@ -15,7 +16,15 @@ class ClientCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(todayTotalOrderByClientProvider(client.uid));
+    final globalDate = ref.watch(dateSelectionProvider);
+    final ordersAsync = ref.watch(
+      todayTotalOrderByClientProvider(
+        (
+          clientId: client.uid,
+          start: globalDate,
+        ),
+      ),
+    );
 
     return GestureDetector(
       onTap: () => context.router.navigate(AppRoutes.orderTakingPage(client)),
@@ -42,7 +51,9 @@ class ClientCard extends ConsumerWidget {
                   return _buildQuantity(totalQuantity);
                 },
                 loading: () => _buildCircularProgress(),
-                error: (_, __) => _buildErrorWidget(),
+                error: (_, stack) {
+                  return _buildErrorWidget();
+                },
               ),
             ],
           ),

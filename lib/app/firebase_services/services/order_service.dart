@@ -12,13 +12,15 @@ class OrderService with FirestoreService {
   static final CollectionReference _ordersCollection =
       _firestore.collection('orders');
 
-  Stream<int> getTodayTotalOrders(String lineId) {
-    // final now = DateTime.now();
-    // final startOfDay = DateTime(now.year, now.month, now.day);
-    // final endOfDay = startOfDay.add(const Duration(days: 1));
+  Stream<int> getTodayTotalOrders(String lineId, DateTime start) {
+    final startOfDay = DateTime(start.year, start.month, start.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
 
     return _ordersCollection
         .where('lineId', isEqualTo: lineId)
+        .where('orderDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay))
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.fold<int>(
@@ -31,9 +33,15 @@ class OrderService with FirestoreService {
     });
   }
 
-  Stream<int> getClientTotalOrders(String clientId) {
+  Stream<int> getClientTotalOrders(String clientId, DateTime start) {
+    final startOfDay = DateTime(start.year, start.month, start.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
     return _ordersCollection
         .where('clientId', isEqualTo: clientId)
+        .where('orderDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay))
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.fold<int>(

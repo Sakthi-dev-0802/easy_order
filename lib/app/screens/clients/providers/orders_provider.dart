@@ -5,13 +5,14 @@ import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final todayTotalOrdersProvider =
-    StreamProvider.family<int, String>((ref, lineId) {
-  return OrderService.instance.getTodayTotalOrders(lineId);
+    StreamProvider.family<int, ({String lineId, DateTime start})>((ref, args) {
+  return OrderService.instance.getTodayTotalOrders(args.lineId, args.start);
 });
 
 final todayTotalOrderByClientProvider =
-    StreamProvider.family<int, String>((ref, clientId) {
-  return OrderService.instance.getClientTotalOrders(clientId);
+    StreamProvider.family<int, ({String clientId, DateTime start})>(
+        (ref, args) {
+  return OrderService.instance.getClientTotalOrders(args.clientId, args.start);
 });
 
 final clientsByLineProvider =

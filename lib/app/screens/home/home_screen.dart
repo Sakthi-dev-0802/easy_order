@@ -3,6 +3,7 @@ import 'package:easy_order/app/components/date_format_extension.dart';
 import 'package:easy_order/app/components/daterange_picker_dialog.dart';
 import 'package:easy_order/app/components/title_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
+import 'package:easy_order/app/providers/date_selection_provider.dart';
 import 'package:easy_order/app/screens/home/widgets/lines_list.dart';
 import 'package:easy_order/app/screens/home/widgets/most_ordered_item.dart';
 import 'package:easy_order/app/screens/home/widgets/order_detail_container.dart';
@@ -23,7 +24,6 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  DateRange? selectedDateRange;
   String? startDate;
   String? endDate;
 
@@ -35,19 +35,19 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _onDateRangeChanged(DateRange? dateRange) {
-    setState(() {
-      if (dateRange != null) {
-        selectedDateRange = dateRange;
-        startDate = selectedDateRange!.start.toLocal().toYearFormat();
-        endDate = selectedDateRange!.end == selectedDateRange!.start
+    if (dateRange != null) {
+      ref.read(dateSelectionProvider.notifier).state = dateRange.start;
+      setState(() {
+        startDate = dateRange.start.toLocal().toYearFormat();
+        endDate = dateRange.end == dateRange.start
             ? DateTime.now().toLocal().toYearFormat()
-            : selectedDateRange!.end
+            : dateRange.end
                 .add(const Duration(days: 1))
                 .subtract(const Duration(milliseconds: 1))
                 .toLocal()
                 .toYearFormat();
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -102,6 +102,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildDropDownFilter() {
+    final selectedDate = ref.watch(dateSelectionProvider);
     return Row(
       children: [
         GestureDetector(
@@ -113,7 +114,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               child: Row(
                 children: [
                   Text(
-                    _formatSelectedDateRange(selectedDateRange),
+                    _formatSelectedDate(selectedDate),
                     style: AppTextStyle.titleLargeDark.copyWith(
                       color: AppColor.borderGreen,
                     ),
@@ -136,25 +137,25 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _openDatePickerDialog(BuildContext context) => showDialog(
         context: context,
         builder: (context) {
+          final selectedDate = ref.read(dateSelectionProvider);
+          DateRange? initialDateRange;
+          initialDateRange = DateRange(selectedDate, selectedDate);
           return CustomDateRangePickerDialog(
-            initialDateRange: selectedDateRange,
+            initialDateRange: initialDateRange,
             onDateRangeChanged: (dateRange) => _onDateRangeChanged(dateRange),
           );
         },
       );
 
-  String _formatSelectedDateRange(DateRange? dateRange) {
+  String _formatSelectedDate(DateTime? selectedDate) {
     String todayFormatted = DateTime.now().toYearFormat();
-    final start = dateRange?.start.toYearFormat();
-    final end = dateRange?.end.toYearFormat();
-    if (dateRange == null) {
+    final start = selectedDate?.toYearFormat();
+    if (selectedDate == null) {
       return 'Today';
-    } else if (start == todayFormatted && end == todayFormatted) {
+    } else if (start == todayFormatted) {
       return 'Today';
-    } else if (dateRange.start == dateRange.end) {
-      return start!;
     } else {
-      return '$start - $end';
+      return start!;
     }
   }
 }

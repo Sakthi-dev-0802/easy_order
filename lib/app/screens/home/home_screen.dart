@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/date_format_extension.dart';
-import 'package:easy_order/app/components/daterange_picker_dialog.dart';
 import 'package:easy_order/app/components/title_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/providers/date_selection_provider.dart';
@@ -10,7 +9,6 @@ import 'package:easy_order/app/screens/home/widgets/order_detail_container.dart'
 import 'package:easy_order/app/screens/market_info/providers/market_provider.dart';
 import 'package:easy_order/material_styles/material_style.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../components/spacer_component.dart';
@@ -25,27 +23,20 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   String? startDate;
-  String? endDate;
+  DateTime? selectedDate;
 
   @override
   void initState() {
     super.initState();
     startDate = DateTime.now().toLocal().toYearFormat();
-    endDate = null;
   }
 
-  void _onDateRangeChanged(DateRange? dateRange) {
-    if (dateRange != null) {
-      ref.read(dateSelectionProvider.notifier).state = dateRange.start;
+  void _onDateChanged(DateTime? date) {
+    if (date != null) {
+      ref.read(dateSelectionProvider.notifier).state = date;
       setState(() {
-        startDate = dateRange.start.toLocal().toYearFormat();
-        endDate = dateRange.end == dateRange.start
-            ? DateTime.now().toLocal().toYearFormat()
-            : dateRange.end
-                .add(const Duration(days: 1))
-                .subtract(const Duration(milliseconds: 1))
-                .toLocal()
-                .toYearFormat();
+        selectedDate = date;
+        startDate = date.toLocal().toYearFormat();
       });
     }
   }
@@ -134,18 +125,29 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Future<void> _openDatePickerDialog(BuildContext context) => showDialog(
-        context: context,
-        builder: (context) {
-          final selectedDate = ref.read(dateSelectionProvider);
-          DateRange? initialDateRange;
-          initialDateRange = DateRange(selectedDate, selectedDate);
-          return CustomDateRangePickerDialog(
-            initialDateRange: initialDateRange,
-            onDateRangeChanged: (dateRange) => _onDateRangeChanged(dateRange),
-          );
-        },
-      );
+  Future<void> _openDatePickerDialog(BuildContext context) async {
+    final now = DateTime.now();
+    final oneYearAgo = DateTime(now.year - 1, now.month, now.day);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? now,
+      firstDate: oneYearAgo,
+      lastDate: now,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColor.buttonGreen,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    _onDateChanged(picked);
+  }
 
   String _formatSelectedDate(DateTime? selectedDate) {
     String todayFormatted = DateTime.now().toYearFormat();

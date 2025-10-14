@@ -6,6 +6,7 @@ import 'package:easy_order/app/constants/spacing_constant.dart';
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
 import 'package:easy_order/app/firebase_services/model/items_model.dart';
 import 'package:easy_order/app/firebase_services/model/order_model.dart';
+import 'package:easy_order/app/providers/date_selection_provider.dart';
 import 'package:easy_order/app/screens/orders/state/order_notifier.dart';
 import 'package:easy_order/app/screens/orders/widgets/item_card.dart';
 import 'package:easy_order/app/screens/orders/widgets/quantity_unit_dialog.dart';
@@ -36,6 +37,7 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
   @override
   Widget build(BuildContext context) {
     final orderState = ref.watch(orderStateStateProvider);
+    final globalDate = ref.read(dateSelectionProvider);
 
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
@@ -48,11 +50,10 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
                 ? _buildErrorText(orderState)
                 : Column(
                     children: [
-                      _buildContent(orderState),
-                      // Need to change as per the order update flow
-                      if (orderState.items
+                      _buildContent(orderState, globalDate),
+                      if ((orderState.items
                               ?.any((item) => item.markedForOrder == true) ??
-                          false)
+                          false) && isToday(globalDate))
                         _buildOrderConfirmButton(context),
                     ],
                   ),
@@ -92,7 +93,11 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
     );
   }
 
-  Widget _buildContent(OrderStateState orderState) => Expanded(
+  Widget _buildContent(
+    OrderStateState orderState,
+    DateTime globalDate,
+  ) =>
+      Expanded(
         child: GridView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
@@ -111,6 +116,11 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
 
             return GestureDetector(
               onTap: () async {
+                if (!isToday(globalDate)) {
+                  context.showErrorSnackBar(
+                      'Cannot modify orders for selected date');
+                  return;
+                }
                 ItemsModel? detailedItem;
                 if (item?.markedForOrder == true) {
                   detailedItem = item;
@@ -213,5 +223,12 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
         context.showErrorSnackBar('Error creating order: ${e.toString()}');
       }
     }
+  }
+
+  bool isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
   }
 }

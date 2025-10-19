@@ -29,8 +29,11 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(orderStateStateProvider.notifier).getItems();
+    final start = ref.read(dateSelectionProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final notifier = ref.read(orderStateStateProvider.notifier);
+      await notifier.getItems();
+      await notifier.getClientOrders(widget.client.uid, start);
     });
   }
 
@@ -51,9 +54,10 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
                 : Column(
                     children: [
                       _buildContent(orderState, globalDate),
-                      if ((orderState.items
-                              ?.any((item) => item.markedForOrder == true) ??
-                          false) && isToday(globalDate))
+                      if ((orderState.items?.any(
+                                  (item) => item.markedForOrder == true) ??
+                              false) &&
+                          isToday(globalDate))
                         _buildOrderConfirmButton(context),
                     ],
                   ),

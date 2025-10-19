@@ -6,7 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final todayTotalOrdersProvider =
     StreamProvider.family<int, ({String lineId, DateTime start})>((ref, args) {
-  return OrderService.instance.getTodayTotalOrders(args.lineId, args.start);
+  return OrderService.instance
+      .getTodayTotalOrdersQuantity(args.lineId, args.start);
 });
 
 final todayTotalOrderByClientProvider =

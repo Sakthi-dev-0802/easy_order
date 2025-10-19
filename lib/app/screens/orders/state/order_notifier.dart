@@ -13,7 +13,6 @@ class OrderStateState {
   final String? error;
   final LineModel? line;
   final List<ItemsModel>? items;
-  final List<ItemsModel>? originalItems;
 
   OrderStateState({
     this.isLoading = false,
@@ -21,7 +20,6 @@ class OrderStateState {
     this.error,
     this.line,
     this.items,
-    this.originalItems,
   });
 
   OrderStateState copyWith({
@@ -41,7 +39,6 @@ class OrderStateState {
       error: error ?? this.error,
       line: line ?? this.line,
       items: items ?? this.items,
-      originalItems: originalItems ?? this.originalItems,
     );
   }
 }
@@ -53,12 +50,17 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
     try {
       state = state.copyWith(isLoading: true);
       final items = await ItemsService.instance.getAllItems();
-      final updatedItems =
-          items.map((item) => item.copyWith(quantity: 0, noOfPack: 0)).toList();
+      final resetItems = items
+          .map((item) => item.copyWith(
+                quantity: 0,
+                noOfPack: 0,
+                markedForOrder: false,
+              ))
+          .toList();
       state = state.copyWith(
         isLoading: false,
-        items: updatedItems,
-        originalItems: items,
+        items: resetItems,
+        originalItems: resetItems,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -70,7 +72,6 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
     if (state.items == null || index >= state.items!.length) return;
 
     final updatedItems = List<ItemsModel>.from(state.items!);
-    // final updatedOriginalItems = List<ItemsModel>.from(state.originalItems!);
 
     if (isRemoved) {
       updatedItems[index] = updatedItems[index].copyWith(
@@ -87,17 +88,7 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
       );
     }
 
-    // updatedOriginalItems[index] = updatedOriginalItems[index].copyWith(
-    //   quantity: quantity,
-    //   noOfPack: noOfPack,
-    //   packingType: packType,
-    //   markedForOrder: true,
-    // );
-
-    state = state.copyWith(
-      items: updatedItems,
-      // originalItems: updatedOriginalItems,
-    );
+    state = state.copyWith(items: updatedItems);
   }
 
   Future<void> createOrder(OrderModel order) async {
@@ -107,6 +98,49 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
       state = state.copyWith(isCreatingOrder: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isCreatingOrder: false);
+    }
+  }
+
+  Future<void> getClientOrders(String clientId, DateTime start) async {
+    try {
+      state = state.copyWith(isLoading: true);
+
+      final orders =
+          await OrderService.instance.getTodayOrderForClient(clientId, start);
+
+      final orderedItems = orders
+          .expand((order) => order.items)
+          .where((item) => item.markedForOrder == true)
+          .toList();
+
+      final orderedItemIds = orderedItems.map((item) => item.uid).toList();
+      final currentItems = List<ItemsModel>.from(state.items ?? []);
+
+      final updatedItems = currentItems.map((item) {
+        if (orderedItemIds.contains(item.uid)) {
+          final orderedItem =
+              orderedItems.firstWhere((ordered) => ordered.uid == item.uid);
+          return item.copyWith(
+            quantity: orderedItem.quantity,
+            packingType: orderedItem.packType,
+            noOfPack: orderedItem.noOfPack,
+            markedForOrder: true,
+          );
+        } else {
+          return item.copyWith(
+            quantity: 0,
+            noOfPack: 0,
+            markedForOrder: false,
+          );
+        }
+      }).toList();
+
+      state = state.copyWith(
+        items: updatedItems,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 

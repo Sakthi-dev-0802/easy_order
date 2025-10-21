@@ -1,12 +1,22 @@
+import 'package:easy_order/app/components/progress_bar.dart';
+import 'package:easy_order/app/providers/date_selection_provider.dart';
+import 'package:easy_order/app/screens/home/provider/total_quantity_provider.dart';
+import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class OrderDetailContainer extends StatelessWidget {
+class OrderDetailContainer extends ConsumerWidget {
   const OrderDetailContainer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final globalDate = ref.watch(dateSelectionProvider);
+    final marketId = ref.watch(userMarketProvider);
     const double borderWidth = 2.0;
     final BorderRadius borderRadius = BorderRadius.circular(8.0);
+    final totalOrdersQuantityAsyncValue = ref.watch(
+      totalQuantityProvider((marketId: marketId ?? '', start: globalDate)),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -43,11 +53,11 @@ class OrderDetailContainer extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'Total Orders',
                       style: TextStyle(
                         fontSize: 16,
@@ -55,13 +65,24 @@ class OrderDetailContainer extends StatelessWidget {
                         color: Colors.black,
                       ),
                     ),
-                    Spacer(),
-                    Text(
-                      "1001",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                    const Spacer(),
+                    totalOrdersQuantityAsyncValue.when(
+                      data: (data) => Text(
+                        data.toString(),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                      loading: () => const ProgressBarWidget(size: 24),
+                      error: (error, stack) => const Text(
+                        '0',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
                       ),
                     ),
                   ],

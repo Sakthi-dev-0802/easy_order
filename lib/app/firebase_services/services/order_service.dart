@@ -12,12 +12,33 @@ class OrderService with FirestoreService {
   static final CollectionReference _ordersCollection =
       _firestore.collection('orders');
 
-  Stream<int> getTodayTotalOrdersQuantity(String lineId, DateTime start) {
+  Stream<int> getTodayTotalOrdersQuantityByLine(String lineId, DateTime start) {
     final startOfDay = DateTime(start.year, start.month, start.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
     return _ordersCollection
         .where('lineId', isEqualTo: lineId)
+        .where('orderDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay))
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.fold<int>(
+        0,
+        (sums, doc) {
+          final order = OrderModel.fromMap(doc.data() as Map<String, dynamic>);
+          return sums + order.quantity;
+        },
+      );
+    });
+  }
+
+  Stream<int> getTodayTotalOrdersQuantityByMarket(String marketId, DateTime start) {
+    final startOfDay = DateTime(start.year, start.month, start.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    return _ordersCollection
+        .where('marketId', isEqualTo: marketId)
         .where('orderDate',
             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
         .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay))

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/common_widgets/line_card.dart';
+import 'package:easy_order/app/components/progress_bar.dart';
 import 'package:easy_order/app/screens/line/providers/lines_provider.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class LinesList extends ConsumerWidget {
               },
             ),
       loading: () => const Center(
-        child: CircularProgressIndicator(),
+        child: ProgressBarWidget(),
       ),
       error: (error, stackTrace) => Center(
         child: Text('Error: $error'),

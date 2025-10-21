@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class OrderStateState {
   final bool isLoading;
   final bool isCreatingOrder;
+  final bool isFetchingDefault;
   final String? error;
   final LineModel? line;
   final List<ItemsModel>? items;
@@ -17,6 +18,7 @@ class OrderStateState {
   OrderStateState({
     this.isLoading = false,
     this.isCreatingOrder = false,
+    this.isFetchingDefault = false,
     this.error,
     this.line,
     this.items,
@@ -25,6 +27,7 @@ class OrderStateState {
   OrderStateState copyWith({
     bool? isLoading,
     bool? isCreatingOrder,
+    bool? isFetchingDefault,
     String? error,
     bool? isLoggedIn,
     UserModel? user,
@@ -36,6 +39,7 @@ class OrderStateState {
     return OrderStateState(
       isLoading: isLoading ?? this.isLoading,
       isCreatingOrder: isCreatingOrder ?? this.isCreatingOrder,
+      isFetchingDefault: isFetchingDefault ?? this.isFetchingDefault,
       error: error ?? this.error,
       line: line ?? this.line,
       items: items ?? this.items,
@@ -144,9 +148,17 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
     }
   }
 
-  Future<ItemsModel> getDefaultOfItem(String itemId) async {
-    final item = await ItemsService.instance.getDefaultOfItem(itemId);
-    return item;
+  Future<ItemsModel?> getDefaultOfItem(String itemId) async {
+    try {
+      state = state.copyWith(isFetchingDefault: true);
+      final item = await ItemsService.instance.getDefaultOfItem(itemId);
+      state = state.copyWith(isFetchingDefault: false);
+
+      return item;
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isFetchingDefault: false);
+      return null;
+    }
   }
 }
 

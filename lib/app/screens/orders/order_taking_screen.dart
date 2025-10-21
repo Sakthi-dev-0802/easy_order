@@ -45,22 +45,33 @@ class _OrderTakingPageState extends ConsumerState<OrderTakingPage> {
     return Scaffold(
       backgroundColor: AppColor.backgroundWhite,
       appBar: _buildAppBar(),
-      body: Padding(
-        padding: EdgeInsets.all(spacing16),
-        child: orderState.isLoading
-            ? _buildProgressBar(false)
-            : orderState.error != null
-                ? _buildErrorText(orderState)
-                : Column(
-                    children: [
-                      _buildContent(orderState, globalDate),
-                      if ((orderState.items?.any(
-                                  (item) => item.markedForOrder == true) ??
-                              false) &&
-                          isToday(globalDate))
-                        _buildOrderConfirmButton(context),
-                    ],
-                  ),
+      body: Stack(
+        children: [
+          if (orderState.isFetchingDefault)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+                child: _buildProgressBar(true),
+              ),
+            ),
+          Padding(
+            padding: EdgeInsets.all(spacing16),
+            child: orderState.isLoading
+                ? _buildProgressBar(false)
+                : orderState.error != null
+                    ? _buildErrorText(orderState)
+                    : Column(
+                        children: [
+                          _buildContent(orderState, globalDate),
+                          if ((orderState.items?.any(
+                                      (item) => item.markedForOrder == true) ??
+                                  false) &&
+                              isToday(globalDate))
+                            _buildOrderConfirmButton(context),
+                        ],
+                      ),
+          ),
+        ],
       ),
     );
   }

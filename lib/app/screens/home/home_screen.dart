@@ -1,12 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/date_format_extension.dart';
+import 'package:easy_order/app/components/progress_bar.dart';
 import 'package:easy_order/app/components/title_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/providers/date_selection_provider.dart';
+import 'package:easy_order/app/screens/home/provider/most_ordered_items_provider.dart';
 import 'package:easy_order/app/screens/home/widgets/lines_list.dart';
 import 'package:easy_order/app/screens/home/widgets/most_ordered_item.dart';
 import 'package:easy_order/app/screens/home/widgets/order_detail_container.dart';
 import 'package:easy_order/app/screens/market_info/providers/market_provider.dart';
+import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:easy_order/material_styles/material_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,6 +47,13 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final marketAsync = ref.watch(marketInfoProvider);
+    final marketId = ref.watch(userMarketProvider);
+    final globalDate = ref.watch(dateSelectionProvider);
+    final mostOrderedAsync = ref.watch(mostOrderedItemsProvider((
+      marketId: marketId ?? '',
+      date: globalDate,
+    )));
+
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -86,7 +96,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                   const TitleComponent(title: "Lines"),
                   const LinesList(),
                   const TitleComponent(title: "Most Ordered Item"),
-                  const MostOrderedItem()
+                  mostOrderedAsync.when(
+                    data: (items) => MostOrderedItem(items: items),
+                    loading: () => const Center(
+                      child: ProgressBarWidget(),
+                    ),
+                    error: (err, stack) => Center(
+                      child: Text('Error: $err'),
+                    ),
+                  ),
                 ],
               )),
         ));

@@ -3,6 +3,7 @@ import 'package:easy_order/app/components/custom_form_field.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/spacing_constant.dart';
 import 'package:easy_order/app/firebase_services/model/market_model.dart';
+import 'package:easy_order/app/screens/landing/state/landing_screen_notifier.dart';
 import 'package:easy_order/app/screens/login/providers/markets_provider.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/app/screens/login/widgets/login_button.dart';
@@ -61,6 +62,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         await AppStorage.saveUser(user);
         ref.read(userMarketProvider.notifier).state = user.marketId;
         if (mounted) {
+          ref.read(landingScreenStateProvider.notifier).changePage(0);
           context.router.replace(AppRoutes.landing);
         }
       }

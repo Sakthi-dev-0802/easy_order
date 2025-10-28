@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_order/app/firebase_services/model/items_model.dart';
+import 'package:easy_order/app/firebase_services/services/items_service.dart';
 import 'package:uuid/uuid.dart';
 
 import '../base_service.dart';
@@ -120,5 +122,48 @@ class OrderService with FirestoreService {
         await _ordersCollection.doc(orderId).set(order.toMap());
       }
     }, 'creating/updating order for client: ${order.clientId}');
+  }
+
+  Stream<List<ItemsModel>> mostOrderedItemsStream({
+    required String marketId,
+    required DateTime date,
+  }) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final Query ordersQuery = _ordersCollection
+        .where('marketId', isEqualTo: marketId)
+        .where('orderDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay));
+
+    return ordersQuery.snapshots().asyncMap((snapshot) async {
+      // Get canonical items (so items with 0 orders are included)
+      final items = await ItemsService.instance.getAllItems();
+
+      // Aggregate quantities by item uid
+      final Map<String, int> totals = {};
+
+      for (final doc in snapshot.docs) {
+        final order = OrderModel.fromMap(doc.data() as Map<String, dynamic>);
+        for (final orderedItem in order.items) {
+          final qty = orderedItem.quantity ?? 0;
+          totals.update(orderedItem.uid, (v) => v + qty, ifAbsent: () => qty);
+        }
+      }
+
+      // Map totals onto items list, defaulting to 0 if not present
+      final List<ItemsModel> result = items
+          .map((it) => it.copyWith(quantity: totals[it.uid] ?? 0))
+          .toList();
+
+      // Sort ascending by aggregated quantity
+      result.sort((a, b) {
+        final aq = a.quantity ?? 0;
+        final bq = b.quantity ?? 0;
+        return bq.compareTo(aq);
+      });
+
+      return result;
+    });
   }
 }

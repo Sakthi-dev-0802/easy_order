@@ -40,7 +40,7 @@ class OrderModel {
       'uid': uid,
       'clientId': clientId,
       'lineId': lineId,
-      'marketId': marketId, 
+      'marketId': marketId,
       'quantity': quantity,
       'orderDate': Timestamp.fromDate(orderDate),
       'items': items.map((item) => item.toMap()).toList(),

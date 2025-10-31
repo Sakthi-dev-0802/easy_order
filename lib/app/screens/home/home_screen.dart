@@ -11,6 +11,7 @@ import 'package:easy_order/app/screens/home/widgets/order_detail_container.dart'
 import 'package:easy_order/app/screens/market_info/providers/market_provider.dart';
 import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:easy_order/material_styles/material_style.dart';
+import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,14 +67,22 @@ class _HomePageState extends ConsumerState<HomePage> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius12),
-                  color: AppColor.borderGreen,
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text("data"),
+              child: GestureDetector(
+                onTap: () => context.router.navigate(AppRoutes.loadLinesPage),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(radius12),
+                    color: AppColor.borderGreen,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      "Report",
+                      style: TextStyle(
+                        color: AppColor.iconLight,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             )

@@ -35,7 +35,10 @@ class OrderService with FirestoreService {
     });
   }
 
-  Stream<int> getTodayTotalOrdersQuantityByMarket(String marketId, DateTime start) {
+  Stream<int> getTodayTotalOrdersQuantityByMarket(
+    String marketId,
+    DateTime start,
+  ) {
     final startOfDay = DateTime(start.year, start.month, start.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
 

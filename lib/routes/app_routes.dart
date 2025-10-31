@@ -40,4 +40,11 @@ class AppRoutes {
   //Order Taking Route
   static orderTakingPage(ClientModel client) =>
       OrderTakingRoute(client: client);
+
+  //Load Lines Route
+  static get loadLinesPage => const LoadLinesRoute();
+
+  //Load Report Route
+  static loadReportPage(String lineId, String lineName) =>
+      LoadReportRoute(lineId: lineId, lineName: lineName);
 }

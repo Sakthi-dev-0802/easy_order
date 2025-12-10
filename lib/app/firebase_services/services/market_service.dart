@@ -21,6 +21,11 @@ class MarketService with FirestoreService {
   }
 
   static Future<MarketModel?> getMarketById(String marketId) async {
+    // Return null if marketId is empty to prevent Firestore error
+    if (marketId.isEmpty) {
+      return null;
+    }
+
     return await FirestoreService.performFirestoreOperation(() async {
       DocumentSnapshot doc = await _marketCollection.doc(marketId).get();
       return doc.exists

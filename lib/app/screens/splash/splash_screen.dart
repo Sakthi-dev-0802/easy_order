@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/constants/sizing_constant.dart';
+import 'package:easy_order/app/firebase_services/services/market_service.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
 import 'package:easy_order/core/storage/app_storage.dart';
 import 'package:easy_order/core/utils/user_market_provider.dart';
@@ -33,9 +34,41 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     if (user == null) {
       currentContext.router.replaceAll([AppRoutes.loginPage]);
     } else {
-      ref.read(loginStateProvider.notifier).setUser(user);
-      ref.read(userMarketProvider.notifier).state = user.marketId;
-      currentContext.router.replaceAll([AppRoutes.landing]);
+      // Validate market ID exists in database
+      if (user.marketId.isEmpty) {
+        // Clear invalid user data and redirect to login
+        await AppStorage.clearUser();
+        if (currentContext.mounted) {
+          currentContext.router.replaceAll([AppRoutes.loginPage]);
+        }
+        return;
+      }
+
+      try {
+        final market = await MarketService.getMarketById(user.marketId);
+        
+        if (market == null) {
+          // Market ID not found in database - clear user and redirect to login
+          await AppStorage.clearUser();
+          if (currentContext.mounted) {
+            currentContext.router.replaceAll([AppRoutes.loginPage]);
+          }
+          return;
+        }
+
+        // Market exists, proceed with navigation
+        ref.read(loginStateProvider.notifier).setUser(user);
+        ref.read(userMarketProvider.notifier).state = user.marketId;
+        if (currentContext.mounted) {
+          currentContext.router.replaceAll([AppRoutes.landing]);
+        }
+      } catch (e) {
+        // Error checking market - clear user and redirect to login
+        await AppStorage.clearUser();
+        if (currentContext.mounted) {
+          currentContext.router.replaceAll([AppRoutes.loginPage]);
+        }
+      }
     }
   }
 

@@ -129,12 +129,14 @@ class OrderStateStateNotifier extends StateNotifier<OrderStateState> {
             packingType: orderedItem.packType,
             noOfPack: orderedItem.noOfPack,
             markedForOrder: true,
+            loaded: orderedItem.loaded, // Preserve loaded status
           );
         } else {
           return item.copyWith(
             quantity: 0,
             noOfPack: 0,
             markedForOrder: false,
+            loaded: false,
           );
         }
       }).toList();

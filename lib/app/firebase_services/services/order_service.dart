@@ -118,7 +118,39 @@ class OrderService with FirestoreService {
       if (querySnapshot.docs.isNotEmpty) {
         // Update the first found order for today
         final docRef = querySnapshot.docs.first.reference;
-        await docRef.update(order.toMap());
+        
+        // Get existing order to preserve loaded status
+        final existingOrder = OrderModel.fromMap(
+            querySnapshot.docs.first.data() as Map<String, dynamic>);
+        
+        // Create a map of existing items by uid to preserve loaded status
+        final existingItemsMap = <String, ItemsModel>{};
+        for (final item in existingOrder.items) {
+          existingItemsMap[item.uid] = item;
+        }
+        
+        // Merge new items with existing loaded status
+        final mergedItems = order.items.map((newItem) {
+          final existingItem = existingItemsMap[newItem.uid];
+          if (existingItem != null && existingItem.loaded) {
+            // Preserve loaded status from existing item
+            return newItem.copyWith(loaded: true);
+          }
+          return newItem;
+        }).toList();
+        
+        // Create updated order with merged items
+        final updatedOrder = OrderModel(
+          uid: existingOrder.uid,
+          clientId: order.clientId,
+          lineId: order.lineId,
+          marketId: order.marketId,
+          quantity: order.quantity,
+          orderDate: order.orderDate,
+          items: mergedItems,
+        );
+        
+        await docRef.update(updatedOrder.toMap());
       } else {
         // Create new order
         final orderId = const Uuid().v4();
@@ -168,5 +200,79 @@ class OrderService with FirestoreService {
 
       return result;
     });
+  }
+
+  Future<List<OrderModel>> getTodaysOrdersByLine(
+    String lineId,
+    DateTime date,
+  ) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    final querySnapshot = await _ordersCollection
+        .where('lineId', isEqualTo: lineId)
+        .where('orderDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay))
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return querySnapshot.docs
+          .map((doc) => OrderModel.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  /// Update the loaded status of a specific item in an order
+  Future<void> updateItemLoadedStatus({
+    required String clientId,
+    required String itemId,
+    required bool loaded,
+    required DateTime orderDate,
+  }) async {
+    await FirestoreService.performFirestoreOperation(() async {
+      final startOfDay = DateTime(
+          orderDate.year, orderDate.month, orderDate.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      // Find today's order for the client
+      final querySnapshot = await _ordersCollection
+          .where('clientId', isEqualTo: clientId)
+          .where('orderDate',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay))
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception('Order not found for client: $clientId');
+      }
+
+      final doc = querySnapshot.docs.first;
+      final orderData = doc.data() as Map<String, dynamic>;
+      final order = OrderModel.fromMap(orderData);
+
+      // Update the specific item's loaded status
+      final updatedItems = order.items.map((item) {
+        if (item.uid == itemId) {
+          return item.copyWith(loaded: loaded);
+        }
+        return item;
+      }).toList();
+
+      // Create updated order
+      final updatedOrder = OrderModel(
+        uid: order.uid,
+        clientId: order.clientId,
+        lineId: order.lineId,
+        marketId: order.marketId,
+        quantity: order.quantity,
+        orderDate: order.orderDate,
+        items: updatedItems,
+      );
+
+      // Update in Firestore
+      await doc.reference.update(updatedOrder.toMap());
+    }, 'updating loaded status for item: $itemId in client: $clientId');
   }
 }

@@ -1,7 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/common_widgets/line_card.dart';
 import 'package:easy_order/app/components/progress_bar.dart';
+import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/screens/line/providers/lines_provider.dart';
+import 'package:easy_order/material_styles/app_color.dart';
+import 'package:easy_order/material_styles/app_text_style.dart';
 import 'package:easy_order/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,14 +18,23 @@ class LinesList extends ConsumerWidget {
 
     return linesAsync.when(
       data: (lines) => lines.isEmpty
-          ? const Center(
-              child: Text(
-                'No Lines Available',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                ),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.route_outlined,
+                    size: size64,
+                    color: AppColor.textDarkGray.withOpacity(0.4),
+                  ),
+                  SizedBox(height: spacing16),
+                  Text(
+                    'No Lines Available',
+                    style: AppTextStyle.titleMediumDark.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             )
           : GridView.builder(

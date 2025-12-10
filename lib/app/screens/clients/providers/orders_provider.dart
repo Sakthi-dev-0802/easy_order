@@ -20,5 +20,5 @@ final clientsByLineProvider =
     StreamProvider.family<List<ClientModel>, String>((ref, lineId) {
   final marketId = ref.watch(userMarketProvider);
   if (marketId == null) return Stream.value([]);
-  return ClientService.instance.getClients(marketId, lineId: lineId);
+  return ClientService.instance.getClientsStreams(marketId, lineId: lineId);
 });

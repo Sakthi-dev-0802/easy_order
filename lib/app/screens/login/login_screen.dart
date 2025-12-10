@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_order/app/components/components.dart';
 import 'package:easy_order/app/components/snackbar_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
+import 'package:easy_order/app/firebase_services/services/market_service.dart';
 import 'package:easy_order/app/firebase_services/services/user_service.dart';
 import 'package:easy_order/app/screens/landing/state/landing_screen_notifier.dart';
 import 'package:easy_order/app/screens/login/state/auth_notifier.dart';
@@ -76,12 +77,42 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final user = await UserService.getCurrentUser(_emailController.text.trim());
 
     if (user != null) {
-      await AppStorage.saveUser(user);
-      ref.read(userMarketProvider.notifier).state = user.marketId;
-      ref.read(loginStateProvider.notifier).setUser(user);
-      if (mounted) {
-        ref.read(landingScreenStateProvider.notifier).changePage(0);
-        context.router.replace(AppRoutes.landing);
+      // Validate market ID exists in database
+      if (user.marketId.isEmpty) {
+        if (mounted) {
+          context.showErrorSnackBar(
+              'Market ID is missing. Please contact support.');
+        }
+        return;
+      }
+
+      try {
+        final market = await MarketService.getMarketById(user.marketId);
+
+        if (market == null) {
+          // Market ID not found in database
+          if (mounted) {
+            context.showErrorSnackBar(
+                'Invalid market ID. The market associated with your account does not exist. Please contact support.');
+          }
+          return;
+        }
+
+        // Market exists, proceed with login
+        await AppStorage.saveUser(user);
+        ref.read(userMarketProvider.notifier).state = user.marketId;
+        ref.read(loginStateProvider.notifier).setUser(user);
+        if (mounted) {
+          ref.read(landingScreenStateProvider.notifier).changePage(0);
+          context.router.replace(AppRoutes.landing);
+        }
+      } catch (e) {
+        // Error checking market
+        if (mounted) {
+          context
+              .showErrorSnackBar('Failed to validate market: ${e.toString()}');
+        }
+        return;
       }
     } else {
       if (mounted) {

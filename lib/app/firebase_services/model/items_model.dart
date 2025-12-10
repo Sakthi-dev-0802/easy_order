@@ -5,6 +5,7 @@ class ItemsModel {
   String? packType;
   int? noOfPack;
   final bool markedForOrder;
+  final bool loaded;
 
   ItemsModel({
     required this.uid,
@@ -13,6 +14,7 @@ class ItemsModel {
     this.packType,
     this.noOfPack,
     this.markedForOrder = false,
+    this.loaded = false,
   });
 
   factory ItemsModel.fromMap(Map<String, dynamic> data) {
@@ -23,6 +25,7 @@ class ItemsModel {
       packType: data['packType'],
       noOfPack: data['noOfPack'],
       markedForOrder: data['markedForOrder'] ?? false,
+      loaded: data['loaded'] ?? false,
     );
   }
 
@@ -34,6 +37,7 @@ class ItemsModel {
       'packType': packType,
       'noOfPack': noOfPack,
       'markedForOrder': markedForOrder,
+      'loaded': loaded,
     };
   }
 
@@ -44,6 +48,7 @@ class ItemsModel {
     String? packingType,
     int? noOfPack,
     bool? markedForOrder,
+    bool? loaded,
   }) {
     return ItemsModel(
       uid: uid ?? this.uid,
@@ -52,6 +57,7 @@ class ItemsModel {
       packType: packingType ?? packType,
       noOfPack: noOfPack ?? this.noOfPack,
       markedForOrder: markedForOrder ?? this.markedForOrder,
+      loaded: loaded ?? this.loaded,
     );
   }
 }

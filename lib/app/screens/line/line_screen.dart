@@ -58,10 +58,22 @@ class LinePage extends ConsumerWidget {
       );
 
   Widget _buildEmtyListView() => Center(
-        child: Text(
-          'No Lines Available',
-          style: AppTextStyle.titleMediumDark
-              .copyWith(fontWeight: FontWeight.w500),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.route_outlined,
+              size: size64,
+              color: AppColor.textDarkGray.withOpacity(0.4),
+            ),
+            SizedBox(height: spacing16),
+            Text(
+              'No Lines Available',
+              style: AppTextStyle.titleMediumDark.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       );
 

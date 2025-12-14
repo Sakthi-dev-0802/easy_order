@@ -118,17 +118,17 @@ class OrderService with FirestoreService {
       if (querySnapshot.docs.isNotEmpty) {
         // Update the first found order for today
         final docRef = querySnapshot.docs.first.reference;
-        
+
         // Get existing order to preserve loaded status
         final existingOrder = OrderModel.fromMap(
             querySnapshot.docs.first.data() as Map<String, dynamic>);
-        
+
         // Create a map of existing items by uid to preserve loaded status
         final existingItemsMap = <String, ItemsModel>{};
         for (final item in existingOrder.items) {
           existingItemsMap[item.uid] = item;
         }
-        
+
         // Merge new items with existing loaded status
         final mergedItems = order.items.map((newItem) {
           final existingItem = existingItemsMap[newItem.uid];
@@ -138,7 +138,7 @@ class OrderService with FirestoreService {
           }
           return newItem;
         }).toList();
-        
+
         // Create updated order with merged items
         final updatedOrder = OrderModel(
           uid: existingOrder.uid,
@@ -149,7 +149,7 @@ class OrderService with FirestoreService {
           orderDate: order.orderDate,
           items: mergedItems,
         );
-        
+
         await docRef.update(updatedOrder.toMap());
       } else {
         // Create new order
@@ -232,8 +232,8 @@ class OrderService with FirestoreService {
     required DateTime orderDate,
   }) async {
     await FirestoreService.performFirestoreOperation(() async {
-      final startOfDay = DateTime(
-          orderDate.year, orderDate.month, orderDate.day);
+      final startOfDay =
+          DateTime(orderDate.year, orderDate.month, orderDate.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
 
       // Find today's order for the client

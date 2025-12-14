@@ -102,7 +102,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                   _buildDropDownFilter(),
                   const TitleComponent(title: "Total Orders"),
                   const OrderDetailContainer(),
-                  const TitleComponent(title: "Lines"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const TitleComponent(title: "Lines"),
+                      _buildAddItemButton(context),
+                    ],
+                  ),
                   const LinesList(),
                   const TitleComponent(title: "Most Ordered Item"),
                   mostOrderedAsync.when(
@@ -187,4 +193,35 @@ class _HomePageState extends ConsumerState<HomePage> {
       return start!;
     }
   }
+
+  Widget _buildAddItemButton(BuildContext context) => GestureDetector(
+        onTap: () => context.router.navigate(AppRoutes.addItemPage),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius12),
+            color: AppColor.buttonGreen,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  "Add Item",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 }

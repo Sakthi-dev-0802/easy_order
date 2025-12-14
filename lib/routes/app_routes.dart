@@ -47,4 +47,7 @@ class AppRoutes {
   //Load Report Route
   static loadReportPage(String lineId, String lineName) =>
       LoadReportRoute(lineId: lineId, lineName: lineName);
+
+  //Add Item Route
+  static get addItemPage => const AddItemRoute();
 }

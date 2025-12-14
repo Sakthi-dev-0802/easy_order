@@ -24,4 +24,25 @@ class ItemsService with FirestoreService {
     final snapshot = await _itemDefaultsCollection.doc(itemId).get();
     return ItemsModel.fromMap(snapshot.data() as Map<String, dynamic>);
   }
+
+  Future<void> createItem(ItemsModel item) async {
+    await FirestoreService.performFirestoreOperation(() async {
+      // Create minimal item for 'items' collection
+      // Only: name, noOfPack (0), packType (BOX), quantity (0), uid
+      final minimalItem = {
+        'uid': item.uid,
+        'item': item.itemName,
+        'noOfPack': 0,
+        'packType': item.packType,
+        'quantity': 0,
+      };
+
+      // Store all values in 'itemsDefaultValue' collection
+      final defaultItem = item.toMap();
+
+      // Save to both collections
+      await _itemsCollection.doc(item.uid).set(minimalItem);
+      await _itemDefaultsCollection.doc(item.uid).set(defaultItem);
+    }, 'creating item with id: ${item.uid}');
+  }
 }

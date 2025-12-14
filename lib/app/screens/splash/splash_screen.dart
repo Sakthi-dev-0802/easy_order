@@ -46,7 +46,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
       try {
         final market = await MarketService.getMarketById(user.marketId);
-        
+
         if (market == null) {
           // Market ID not found in database - clear user and redirect to login
           await AppStorage.clearUser();

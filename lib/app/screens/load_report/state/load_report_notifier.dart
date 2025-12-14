@@ -61,7 +61,7 @@ class LoadreportStateNotifier extends StateNotifier<LoadreportState> {
       ]);
 
       final orders = results[2] as List<OrderModel>;
-      
+
       // Initialize loadedCells from orders (items with loaded=true)
       final loadedCells = <String>{};
       for (final order in orders) {
@@ -195,9 +195,11 @@ class LoadreportStateNotifier extends StateNotifier<LoadreportState> {
 
     try {
       // Find the client's order
-      final clientOrder = state.orders?.where(
-        (o) => o.clientId == clientId,
-      ).firstOrNull;
+      final clientOrder = state.orders
+          ?.where(
+            (o) => o.clientId == clientId,
+          )
+          .firstOrNull;
 
       if (clientOrder == null) {
         throw Exception('Order not found for client: $clientId');
@@ -228,7 +230,9 @@ class LoadreportStateNotifier extends StateNotifier<LoadreportState> {
       }).toList();
 
       // Remove items with quantity 0
-      final filteredItems = updatedItems.where((item) => item.quantity != null && item.quantity! > 0).toList();
+      final filteredItems = updatedItems
+          .where((item) => item.quantity != null && item.quantity! > 0)
+          .toList();
 
       // Calculate new total quantity
       final totalQuantity = filteredItems

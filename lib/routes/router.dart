@@ -65,5 +65,9 @@ class AppRouter extends $AppRouter {
       page: LoadReportRoute.page,
       path: '/loadreport',
     ),
+    AutoRoute(
+      page: AddItemRoute.page,
+      path: '/additem',
+    ),
   ];
 }

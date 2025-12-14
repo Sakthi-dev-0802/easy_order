@@ -25,6 +25,13 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
   String _selectedPackType = 'BOX';
 
   @override
+  void initState() {
+    super.initState();
+    // Set default value for no of pack
+    _noOfPackController.text = '1';
+  }
+
+  @override
   void dispose() {
     _itemNameController.dispose();
     _defaultQuantityController.dispose();
@@ -39,7 +46,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
     }
 
     final defaultQuantity = int.tryParse(_defaultQuantityController.text) ?? 0;
-    final noOfPack = int.tryParse(_noOfPackController.text) ?? 0;
+    final noOfPack = int.tryParse(_noOfPackController.text) ?? 1;
 
     final item = ItemsModel(
       uid: const Uuid().v4(),
@@ -82,6 +89,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
               label: 'Item Name',
               controller: _itemNameController,
               hintText: 'Enter item name',
+              textCapitalization: TextCapitalization.sentences,
             ),
             SizedBox(height: spacing16),
             CustomFormField.text(
@@ -89,6 +97,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
               controller: _defaultQuantityController,
               hintText: 'Enter default quantity',
               keyboardType: TextInputType.number,
+              textCapitalization: TextCapitalization.none,
             ),
             SizedBox(height: spacing16),
             CustomFormField.dropdown(
@@ -109,6 +118,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
               controller: _noOfPackController,
               hintText: 'Enter number of packs',
               keyboardType: TextInputType.number,
+              textCapitalization: TextCapitalization.none,
             ),
             SizedBox(height: spacing32),
             _buildButton(),

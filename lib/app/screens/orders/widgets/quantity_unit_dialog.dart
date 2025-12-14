@@ -98,6 +98,7 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
                   label: 'Quantity (kg)',
                   controller: _quantityController,
                   keyboardType: TextInputType.number,
+                  isPackType: false,
                 ),
                 SizedBox(height: spacing12),
                 _buildInputField(
@@ -111,6 +112,7 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
                   label: 'No of Pack',
                   controller: _noOfPackController,
                   keyboardType: TextInputType.number,
+                  isPackType: false,
                 ),
                 SizedBox(height: spacing20),
                 Row(
@@ -205,6 +207,8 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
                     label: '',
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     controller: controller,
+                    keyboardType: keyboardType,
+                    textCapitalization: TextCapitalization.none,
                   ),
           ),
         ],

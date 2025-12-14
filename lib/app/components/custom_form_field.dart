@@ -14,6 +14,7 @@ class CustomFormField extends StatefulWidget {
     this.readOnly = false,
     this.onChanged,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.textCapitalization = TextCapitalization.none,
     this.value,
     this.items = const [],
     this.displayItems = const [],
@@ -32,6 +33,7 @@ class CustomFormField extends StatefulWidget {
     bool readOnly = false,
     ValueChanged<String?>? onChanged,
     FloatingLabelBehavior floatingLabelBehavior = FloatingLabelBehavior.auto,
+    TextCapitalization textCapitalization = TextCapitalization.sentences,
     Key? key,
   }) {
     return CustomFormField._(
@@ -45,6 +47,7 @@ class CustomFormField extends StatefulWidget {
       readOnly: readOnly,
       onChanged: onChanged,
       floatingLabelBehavior: floatingLabelBehavior,
+      textCapitalization: textCapitalization,
       fieldType: FormFieldType.text,
     );
   }
@@ -103,6 +106,7 @@ class CustomFormField extends StatefulWidget {
   final bool readOnly;
   final ValueChanged<String?>? onChanged;
   final FloatingLabelBehavior floatingLabelBehavior;
+  final TextCapitalization textCapitalization;
   final bool obscureText;
   final bool? togglePassword;
 
@@ -196,7 +200,7 @@ class _CustomFormFieldState extends State<CustomFormField> {
             fontSize: 18,
           ),
           onChanged: widget.onChanged,
-          textCapitalization: TextCapitalization.sentences,
+          textCapitalization: widget.textCapitalization,
         );
       },
     );

@@ -20,6 +20,22 @@ class ItemsService with FirestoreService {
         .toList();
   }
 
+  Stream<List<ItemsModel>> getAllItemsStream() {
+    return _itemsCollection.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ItemsModel.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
+  Stream<List<ItemsModel>> getAllItemsWithDefaultsStream() {
+    return _itemDefaultsCollection.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ItemsModel.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
   Future<ItemsModel> getDefaultOfItem(String itemId) async {
     final snapshot = await _itemDefaultsCollection.doc(itemId).get();
     return ItemsModel.fromMap(snapshot.data() as Map<String, dynamic>);
@@ -44,5 +60,25 @@ class ItemsService with FirestoreService {
       await _itemsCollection.doc(item.uid).set(minimalItem);
       await _itemDefaultsCollection.doc(item.uid).set(defaultItem);
     }, 'creating item with id: ${item.uid}');
+  }
+
+  Future<void> updateItem(ItemsModel item) async {
+    await FirestoreService.performFirestoreOperation(() async {
+      // Update minimal item in 'items' collection
+      final minimalItem = {
+        'uid': item.uid,
+        'item': item.itemName,
+        'noOfPack': 0,
+        'packType': item.packType,
+        'quantity': 0,
+      };
+
+      // Update all values in 'itemsDefaultValue' collection
+      final defaultItem = item.toMap();
+
+      // Update both collections
+      await _itemsCollection.doc(item.uid).update(minimalItem);
+      await _itemDefaultsCollection.doc(item.uid).update(defaultItem);
+    }, 'updating item with id: ${item.uid}');
   }
 }

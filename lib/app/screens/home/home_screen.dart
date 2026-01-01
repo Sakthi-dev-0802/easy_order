@@ -5,9 +5,10 @@ import 'package:easy_order/app/components/title_component.dart';
 import 'package:easy_order/app/constants/constants.dart';
 import 'package:easy_order/app/providers/date_selection_provider.dart';
 import 'package:easy_order/app/screens/home/provider/most_ordered_items_provider.dart';
-import 'package:easy_order/app/screens/home/widgets/lines_list.dart';
+import 'package:easy_order/app/screens/home/widgets/items_card.dart';
 import 'package:easy_order/app/screens/home/widgets/most_ordered_item.dart';
 import 'package:easy_order/app/screens/home/widgets/order_detail_container.dart';
+import 'package:easy_order/app/screens/home/widgets/total_pack_counts_grid.dart';
 import 'package:easy_order/app/screens/market_info/providers/market_provider.dart';
 import 'package:easy_order/core/utils/user_market_provider.dart';
 import 'package:easy_order/material_styles/material_style.dart';
@@ -50,7 +51,11 @@ class _HomePageState extends ConsumerState<HomePage> {
     final marketAsync = ref.watch(marketInfoProvider);
     final marketId = ref.watch(userMarketProvider);
     final globalDate = ref.watch(dateSelectionProvider);
-    final mostOrderedAsync = ref.watch(mostOrderedItemsProvider((
+    final mostOrderedAsync = ref.watch(mostOrderedItemsWithPackCountsProvider((
+      marketId: marketId ?? '',
+      date: globalDate,
+    )));
+    final totalPackCountsAsync = ref.watch(totalPackCountsProvider((
       marketId: marketId ?? '',
       date: globalDate,
     )));
@@ -102,14 +107,27 @@ class _HomePageState extends ConsumerState<HomePage> {
                   _buildDropDownFilter(),
                   const TitleComponent(title: "Total Orders"),
                   const OrderDetailContainer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const TitleComponent(title: "Lines"),
-                      _buildAddItemButton(context),
-                    ],
+                  const TitleComponent(title: "Total Pack Counts"),
+                  totalPackCountsAsync.when(
+                    data: (packCounts) => TotalPackCountsGrid(
+                      packCounts: packCounts,
+                    ),
+                    loading: () => const Center(
+                      child: ProgressBarWidget(),
+                    ),
+                    error: (err, stack) => Center(
+                      child: Text('Error: $err'),
+                    ),
                   ),
-                  const LinesList(),
+                  const ItemsCard(),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     const TitleComponent(title: "Lines"),
+                  //     _buildAddItemButton(context),
+                  //   ],
+                  // ),
+                  // const LinesList(),
                   const TitleComponent(title: "Most Ordered Item"),
                   mostOrderedAsync.when(
                     data: (items) => MostOrderedItem(items: items),
@@ -194,34 +212,34 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  Widget _buildAddItemButton(BuildContext context) => GestureDetector(
-        onTap: () => context.router.navigate(AppRoutes.addItemPage),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(radius12),
-            color: AppColor.buttonGreen,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 4),
-                const Text(
-                  "Add Item",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+  // Widget _buildAddItemButton(BuildContext context) => GestureDetector(
+  //       onTap: () => context.router.navigate(AppRoutes.addItemPage),
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //           borderRadius: BorderRadius.circular(radius12),
+  //           color: AppColor.buttonGreen,
+  //         ),
+  //         child: const Padding(
+  //           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  //           child: Row(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Icon(
+  //                 Icons.add,
+  //                 color: Colors.white,
+  //                 size: 20,
+  //               ),
+  //               SizedBox(width: 4),
+  //               Text(
+  //                 "Add Item",
+  //                 style: TextStyle(
+  //                   color: Colors.white,
+  //                   fontWeight: FontWeight.w500,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     );
 }

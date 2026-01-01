@@ -1,10 +1,11 @@
 import 'package:easy_order/app/constants/radius_constant.dart';
-import 'package:easy_order/app/firebase_services/model/items_model.dart';
+import 'package:easy_order/app/constants/spacing_constant.dart';
+import 'package:easy_order/app/firebase_services/model/most_ordered_item_model.dart';
 import 'package:easy_order/material_styles/material_style.dart';
 import 'package:flutter/material.dart';
 
 class MostOrderedItem extends StatelessWidget {
-  final List<ItemsModel> items;
+  final List<MostOrderedItemModel> items;
   const MostOrderedItem({super.key, required this.items});
 
   @override
@@ -29,17 +30,41 @@ class MostOrderedItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius08),
             border: Border.all(color: AppColor.borderMutedGray),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                item.itemName,
-                style: AppTextStyle.bodyTextSmallLightWhite,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      item.item.itemName,
+                      style: AppTextStyle.bodyTextSmallLightWhite.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${item.totalQuantity}kg',
+                    style: AppTextStyle.titleLargeLightWhite,
+                  ),
+                ],
               ),
-              const Spacer(),
-              Text(
-                item.quantity.toString(),
-                style: AppTextStyle.titleLargeLightWhite,
-              )
+              SizedBox(height: spacing08),
+              Row(
+                children: [
+                  if (item.smallBoxCount > 0) ...[
+                    _buildPackInfo('SMALL BOX', item.smallBoxCount),
+                    if (item.bigBoxCount > 0 || item.bagCount > 0)
+                      SizedBox(width: spacing16),
+                  ],
+                  if (item.bigBoxCount > 0) ...[
+                    _buildPackInfo('BIG BOX', item.bigBoxCount),
+                    if (item.bagCount > 0) SizedBox(width: spacing16),
+                  ],
+                  if (item.bagCount > 0) _buildPackInfo('BAG', item.bagCount),
+                ],
+              ),
             ],
           ),
         );
@@ -50,4 +75,24 @@ class MostOrderedItem extends StatelessWidget {
       itemCount: items.length,
     );
   }
+
+  Widget _buildPackInfo(String label, int count) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label: ',
+            style: AppTextStyle.bodyTextSmallLightWhite.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            count.toString(),
+            style: AppTextStyle.bodyTextSmallLightWhite.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      );
 }

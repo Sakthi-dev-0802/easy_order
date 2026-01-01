@@ -35,6 +35,17 @@ class ItemStateNotifier extends StateNotifier<ItemState> {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  Future<void> updateItem(ItemsModel item) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      await ItemsService.instance.updateItem(item);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
 }
 
 final itemStateProvider =

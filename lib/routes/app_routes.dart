@@ -1,4 +1,5 @@
 import 'package:easy_order/app/firebase_services/model/client_model.dart';
+import 'package:easy_order/app/firebase_services/model/items_model.dart';
 import 'package:easy_order/routes/router.gr.dart';
 
 class AppRoutes {
@@ -49,5 +50,9 @@ class AppRoutes {
       LoadReportRoute(lineId: lineId, lineName: lineName);
 
   //Add Item Route
-  static get addItemPage => const AddItemRoute();
+  static get addItemPage => AddItemRoute();
+  static addItemPageWithItem(ItemsModel item) => AddItemRoute(item: item);
+
+  //Items List Route
+  static get itemsListPage => const ItemsListRoute();
 }

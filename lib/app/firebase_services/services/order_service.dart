@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_order/app/firebase_services/model/items_model.dart';
+import 'package:easy_order/app/firebase_services/model/most_ordered_item_model.dart';
+import 'package:easy_order/app/firebase_services/model/total_pack_counts_model.dart';
 import 'package:easy_order/app/firebase_services/services/items_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -199,6 +201,117 @@ class OrderService with FirestoreService {
       });
 
       return result;
+    });
+  }
+
+  Stream<List<MostOrderedItemModel>> mostOrderedItemsWithPackCountsStream({
+    required String marketId,
+    required DateTime date,
+  }) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final Query ordersQuery = _ordersCollection
+        .where('marketId', isEqualTo: marketId)
+        .where('orderDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay));
+
+    return ordersQuery.snapshots().asyncMap((snapshot) async {
+      // Get canonical items (so items with 0 orders are included)
+      final items = await ItemsService.instance.getAllItems();
+
+      // Aggregate quantities, bag counts, and box counts by item uid
+      final Map<String, int> totals = {};
+      final Map<String, int> bagTotals = {};
+      final Map<String, int> smallBoxTotals = {};
+      final Map<String, int> bigBoxTotals = {};
+
+      for (final doc in snapshot.docs) {
+        final order = OrderModel.fromMap(doc.data() as Map<String, dynamic>);
+        for (final orderedItem in order.items) {
+          final qty = orderedItem.quantity ?? 0;
+          final packType = orderedItem.packType ?? '';
+          final noOfPack = orderedItem.noOfPack ?? 0;
+
+          // Aggregate total quantity
+          totals.update(orderedItem.uid, (v) => v + qty, ifAbsent: () => qty);
+
+          // Aggregate bag counts
+          if (packType == 'BAG') {
+            bagTotals.update(orderedItem.uid, (v) => v + noOfPack,
+                ifAbsent: () => noOfPack);
+          }
+
+          // Aggregate small box counts
+          if (packType == 'SMALL BOX' || packType == 'BOX') {
+            smallBoxTotals.update(orderedItem.uid, (v) => v + noOfPack,
+                ifAbsent: () => noOfPack);
+          }
+
+          // Aggregate big box counts
+          if (packType == 'BIG BOX') {
+            bigBoxTotals.update(orderedItem.uid, (v) => v + noOfPack,
+                ifAbsent: () => noOfPack);
+          }
+        }
+      }
+
+      // Map totals onto items list
+      final List<MostOrderedItemModel> result = items
+          .map((it) => MostOrderedItemModel(
+                item: it.copyWith(quantity: totals[it.uid] ?? 0),
+                totalQuantity: totals[it.uid] ?? 0,
+                bagCount: bagTotals[it.uid] ?? 0,
+                smallBoxCount: smallBoxTotals[it.uid] ?? 0,
+                bigBoxCount: bigBoxTotals[it.uid] ?? 0,
+              ))
+          .toList();
+
+      // Sort by total quantity (descending)
+      result.sort((a, b) => b.totalQuantity.compareTo(a.totalQuantity));
+
+      return result;
+    });
+  }
+
+  Stream<TotalPackCountsModel> getTotalPackCountsStream({
+    required String marketId,
+    required DateTime date,
+  }) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final Query ordersQuery = _ordersCollection
+        .where('marketId', isEqualTo: marketId)
+        .where('orderDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('orderDate', isLessThan: Timestamp.fromDate(endOfDay));
+
+    return ordersQuery.snapshots().map((snapshot) {
+      int totalSmallBox = 0;
+      int totalBigBox = 0;
+      int totalBag = 0;
+
+      for (final doc in snapshot.docs) {
+        final order = OrderModel.fromMap(doc.data() as Map<String, dynamic>);
+        for (final orderedItem in order.items) {
+          final packType = orderedItem.packType ?? '';
+          final noOfPack = orderedItem.noOfPack ?? 0;
+
+          if (packType == 'SMALL BOX' || packType == 'BOX') {
+            totalSmallBox += noOfPack;
+          } else if (packType == 'BIG BOX') {
+            totalBigBox += noOfPack;
+          } else if (packType == 'BAG') {
+            totalBag += noOfPack;
+          }
+        }
+      }
+
+      return TotalPackCountsModel(
+        smallBoxCount: totalSmallBox,
+        bigBoxCount: totalBigBox,
+        bagCount: totalBag,
+      );
     });
   }
 

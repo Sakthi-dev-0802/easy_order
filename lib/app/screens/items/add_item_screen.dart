@@ -11,7 +11,8 @@ import 'package:uuid/uuid.dart';
 
 @RoutePage()
 class AddItemPage extends ConsumerStatefulWidget {
-  const AddItemPage({super.key});
+  final ItemsModel? item;
+  const AddItemPage({super.key, this.item});
 
   @override
   ConsumerState<AddItemPage> createState() => _AddItemPageState();
@@ -27,8 +28,16 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
   @override
   void initState() {
     super.initState();
-    // Set default value for no of pack
-    _noOfPackController.text = '1';
+    // If editing, populate fields with existing item data
+    if (widget.item != null) {
+      _itemNameController.text = widget.item!.itemName;
+      _defaultQuantityController.text = (widget.item!.quantity ?? 0).toString();
+      _selectedPackType = widget.item!.packType ?? 'SMALL BOX';
+      _noOfPackController.text = (widget.item!.noOfPack ?? 1).toString();
+    } else {
+      // Set default value for no of pack when creating new item
+      _noOfPackController.text = '1';
+    }
   }
 
   @override
@@ -49,7 +58,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
     final noOfPack = int.tryParse(_noOfPackController.text) ?? 1;
 
     final item = ItemsModel(
-      uid: const Uuid().v4(),
+      uid: widget.item?.uid ?? const Uuid().v4(),
       itemName: _itemNameController.text.trim(),
       quantity: defaultQuantity,
       packType: _selectedPackType,
@@ -57,14 +66,25 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
     );
 
     try {
-      await ref.read(itemStateProvider.notifier).createItem(item);
-      if (mounted) {
-        context.showSuccessSnackBar('Item created successfully');
-        context.router.back();
+      if (widget.item != null) {
+        // Update existing item
+        await ref.read(itemStateProvider.notifier).updateItem(item);
+        if (mounted) {
+          context.showSuccessSnackBar('Item updated successfully');
+          context.router.back();
+        }
+      } else {
+        // Create new item
+        await ref.read(itemStateProvider.notifier).createItem(item);
+        if (mounted) {
+          context.showSuccessSnackBar('Item created successfully');
+          context.router.back();
+        }
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to create item: ${e.toString()}');
+        context.showErrorSnackBar(
+            'Failed to ${widget.item != null ? 'update' : 'create'} item: ${e.toString()}');
       }
     }
   }
@@ -75,7 +95,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
       backgroundColor: AppColor.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppColor.backgroundWhite,
-        title: const Text('Add New Item'),
+        title: Text(widget.item != null ? 'Edit Item' : 'Add New Item'),
         elevation: 0,
         forceMaterialTransparency: true,
       ),
@@ -142,9 +162,9 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
             : _buildButtonText(),
       );
 
-  Widget _buildButtonText() => const Text(
-        'Save Item',
-        style: TextStyle(
+  Widget _buildButtonText() => Text(
+        widget.item != null ? 'Update Item' : 'Save Item',
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
           fontWeight: FontWeight.bold,

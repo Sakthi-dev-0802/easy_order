@@ -22,7 +22,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
   final TextEditingController _defaultQuantityController =
       TextEditingController();
   final TextEditingController _noOfPackController = TextEditingController();
-  String _selectedPackType = 'BOX';
+  String _selectedPackType = 'SMALL BOX';
 
   @override
   void initState() {
@@ -103,7 +103,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
             CustomFormField.dropdown(
               label: 'Pack Type',
               value: _selectedPackType,
-              items: const ['BOX', 'BAG'],
+              items: const ['SMALL BOX', 'BIG BOX', 'BAG'],
               onChanged: (value) {
                 if (value != null) {
                   setState(() {

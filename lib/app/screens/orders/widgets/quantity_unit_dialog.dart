@@ -28,7 +28,7 @@ class QuantityUnitDialog extends StatefulWidget {
 class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
   late TextEditingController _quantityController;
   late TextEditingController _noOfPackController;
-  String _selectedPackType = 'BOX';
+  String _selectedPackType = 'SMALL BOX';
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
     _quantityController = TextEditingController();
     _noOfPackController = TextEditingController();
     _quantityController.text = (widget.item.quantity ?? 0).toString();
-    _selectedPackType = (widget.item.packType ?? 'BOX');
+    _selectedPackType = (widget.item.packType ?? 'SMALL BOX');
     _noOfPackController.text = (widget.item.noOfPack ?? 1).toString();
   }
 
@@ -194,7 +194,7 @@ class _QuantityUnitDialogState extends State<QuantityUnitDialog> {
                 ? CustomFormField.dropdown(
                     label: '',
                     value: _selectedPackType,
-                    items: const ['BOX', 'BAG'],
+                    items: const ['SMALL BOX', 'BIG BOX', 'BAG'],
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {

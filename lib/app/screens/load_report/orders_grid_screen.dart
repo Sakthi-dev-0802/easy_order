@@ -400,7 +400,7 @@ class _OrdersGridScreenState extends ConsumerState<OrdersGridScreen> {
               itemId: itemId,
               clientId: clientId,
               quantity: quantity ?? 0,
-              packType: packType ?? orderItem.packType ?? 'BOX',
+              packType: packType ?? orderItem.packType ?? 'SMALLBOX',
               noOfPack: noOfPack ?? 0,
               isRemoved: isRemoved ?? false,
             );

@@ -208,13 +208,17 @@ class _CustomFormFieldState extends State<CustomFormField> {
 
   Widget _buildDropdownField() {
     return DropdownButtonFormField<String>(
+      isExpanded: true,
       value: widget.value,
       dropdownColor: AppColor.backgroundWhite,
       items: List.generate(
         widget.items.length,
         (index) => DropdownMenuItem<String>(
           value: widget.items[index],
-          child: Text(widget.displayItems[index]),
+          child: Text(
+            widget.displayItems[index],
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
       onChanged: widget.enabled ? widget.onChanged : null,

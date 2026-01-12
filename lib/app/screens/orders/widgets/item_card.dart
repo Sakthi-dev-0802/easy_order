@@ -24,37 +24,39 @@ class ItemCard extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Column(
-                spacing: spacing08,
-                children: [
-                  Image.asset(
-                    'assets/images/tomatto.png',
-                    height: 32,
-                    width: 32,
-                  ),
-                  Text(
-                    item?.itemName ?? '',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Column(
+                  spacing: spacing08,
+                  children: [
+                    Image.asset(
+                      'assets/images/tomatto.png',
+                      height: 32,
+                      width: 32,
                     ),
-                  ),
-                ],
+                    Text(
+                      item?.itemName ?? '',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: spacing16),
-            _buildAlignedRow('Quantity', '${item?.quantity}kg'),
-            _buildAlignedRow('Pack Type', item?.packType ?? ''),
-            _buildAlignedRow(
-              'No of Pack',
-              item?.noOfPack.toString() ?? '',
-            ),
-          ],
+              SizedBox(height: spacing16),
+              _buildAlignedRow('Quantity', '${item?.quantity}kg'),
+              _buildAlignedRow('Pack Type', item?.packType ?? ''),
+              _buildAlignedRow(
+                'No of Pack',
+                item?.noOfPack.toString() ?? '',
+              ),
+            ],
+          ),
         ),
       ),
     );

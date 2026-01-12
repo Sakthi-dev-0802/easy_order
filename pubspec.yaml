@@ -47,6 +47,7 @@ dependencies:
   uuid: ^4.5.1
   flutter_date_range_picker: ^0.1.1
   shared_preferences: ^2.5.3
+  two_dimensional_scrollables: ^0.3.7
 
 dev_dependencies:
   flutter_test:

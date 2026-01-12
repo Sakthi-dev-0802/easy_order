@@ -8,6 +8,7 @@ import 'package:easy_order/material_styles/app_color.dart';
 import 'package:easy_order/material_styles/app_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 class OrdersGridScreen extends ConsumerStatefulWidget {
   final List<ItemsModel> items;
@@ -28,35 +29,13 @@ class OrdersGridScreen extends ConsumerStatefulWidget {
 }
 
 class _OrdersGridScreenState extends ConsumerState<OrdersGridScreen> {
-  final ScrollController _horizontalHeaderController = ScrollController();
-  final ScrollController _horizontalBodyController = ScrollController();
-  final ScrollController _verticalBodyController = ScrollController();
-  final ScrollController _verticalItemController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Sync horizontal scroll between header and body
-    _horizontalBodyController.addListener(() {
-      if (_horizontalHeaderController.hasClients) {
-        _horizontalHeaderController.jumpTo(_horizontalBodyController.offset);
-      }
-    });
-
-    // Sync vertical scroll between items column and body
-    _verticalBodyController.addListener(() {
-      if (_verticalItemController.hasClients) {
-        _verticalItemController.jumpTo(_verticalBodyController.offset);
-      }
-    });
-  }
+  final ScrollController _verticalController = ScrollController();
+  final ScrollController _horizontalController = ScrollController();
 
   @override
   void dispose() {
-    _horizontalHeaderController.dispose();
-    _horizontalBodyController.dispose();
-    _verticalBodyController.dispose();
-    _verticalItemController.dispose();
+    _verticalController.dispose();
+    _horizontalController.dispose();
     super.dispose();
   }
 
@@ -87,11 +66,6 @@ class _OrdersGridScreenState extends ConsumerState<OrdersGridScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const double cellWidth = 120;
-    const double cellHeight = 80;
-    const double headerCellWidth = 150;
-
-    final borderColor = Colors.grey.shade400;
     // Watch state to rebuild when loaded status changes
     final loadReportState = ref.watch(loadReportStatePRovider);
     final notifier = ref.read(loadReportStatePRovider.notifier);
@@ -107,7 +81,7 @@ class _OrdersGridScreenState extends ConsumerState<OrdersGridScreen> {
             Icon(
               Icons.description_outlined,
               size: size64,
-              color: AppColor.textDarkGray.withOpacity(0.4),
+              color: AppColor.textDarkGray.withValues(alpha: 0.4),
             ),
             SizedBox(height: spacing16),
             Text(
@@ -124,7 +98,7 @@ class _OrdersGridScreenState extends ConsumerState<OrdersGridScreen> {
                 textAlign: TextAlign.center,
                 style: AppTextStyle.bodyLargeBoldDark.copyWith(
                   fontWeight: FontWeight.w400,
-                  color: AppColor.textDarkGray.withOpacity(0.6),
+                  color: AppColor.textDarkGray.withValues(alpha: 0.6),
                 ),
               ),
             ),
@@ -133,251 +107,239 @@ class _OrdersGridScreenState extends ConsumerState<OrdersGridScreen> {
       );
     }
 
-    return Column(
-      children: [
-        // ===========================
-        // STICKY TOP HEADER ROW (CLIENT NAMES)
-        // ===========================
-        Row(
-          children: [
-            // Corner header cell (sticky)
-            Container(
-              width: headerCellWidth,
-              height: cellHeight,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                border: Border.all(color: borderColor, width: 1),
-              ),
-              child: const Text(
-                "Items ↓  |  Clients →",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
+    return TableView.builder(
+      verticalDetails:
+          ScrollableDetails.vertical(controller: _verticalController),
+      horizontalDetails:
+          ScrollableDetails.horizontal(controller: _horizontalController),
+      pinnedColumnCount: 1, // Sticky Items Column
+      pinnedRowCount: 1, // Sticky Clients Header (Top)
+      columnCount: widget.clients.length + 1, // +1 for the Items column itself
+      rowCount: widget.items.length + 1, // +1 for the Clients header row itself
+      columnBuilder: _buildColumnSpan,
+      rowBuilder: _buildRowSpan,
+      cellBuilder: (context, vicinity) => _buildCell(
+        context,
+        vicinity,
+        isCurrentDate,
+        loadReportState,
+        notifier,
+      ),
+    );
+  }
+
+  TableSpan _buildColumnSpan(int index) {
+    const double headerCellWidth = 150;
+    const double cellWidth = 120;
+
+    return TableSpan(
+      extent: FixedTableSpanExtent(
+        index == 0 ? headerCellWidth : cellWidth,
+      ),
+    );
+  }
+
+  TableSpan _buildRowSpan(int index) {
+    const double cellHeight = 80;
+
+    return const TableSpan(
+      extent: FixedTableSpanExtent(cellHeight),
+    );
+  }
+
+  TableViewCell _buildCell(
+    BuildContext context,
+    TableVicinity vicinity,
+    bool isCurrentDate,
+    LoadreportState loadReportState,
+    LoadreportStateNotifier notifier,
+  ) {
+    final borderColor = Colors.grey.shade400;
+
+    // 1. Top-Left Corner (Sticky Header Intersection)
+    if (vicinity.row == 0 && vicinity.column == 0) {
+      return TableViewCell(
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            border: Border.all(color: borderColor, width: 1),
+          ),
+          child: const Text(
+            "Items ↓  |  Clients →",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
             ),
-            // Client headers - horizontally scrollable (synced with body)
-            Expanded(
-              child: SingleChildScrollView(
-                controller: _horizontalHeaderController,
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
-                child: Row(
-                  children: widget.clients.map((client) {
-                    return Container(
-                      width: cellWidth,
-                      height: cellHeight,
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        border: Border.all(color: borderColor, width: 1),
-                      ),
-                      child: Text(
-                        client.name,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        // ===========================
-        // SCROLLABLE BODY WITH STICKY LEFT COLUMN
-        // ===========================
-        Expanded(
-          child: Row(
-            children: [
-              // STICKY LEFT COLUMN (ITEMS) - vertically scrollable (synced with body)
-              SingleChildScrollView(
-                controller: _verticalItemController,
-                physics: const ClampingScrollPhysics(),
-                child: Column(
-                  children: widget.items.map((item) {
-                    return Container(
-                      width: headerCellWidth,
-                      height: cellHeight,
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        border: Border.all(color: borderColor, width: 1),
-                      ),
-                      child: Text(
-                        item.itemName,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              // SCROLLABLE GRID BODY
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _verticalBodyController,
-                  scrollDirection: Axis.vertical,
-                  physics: const ClampingScrollPhysics(),
-                  child: SingleChildScrollView(
-                    controller: _horizontalBodyController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const ClampingScrollPhysics(),
-                    child: Column(
-                      children: List.generate(widget.items.length, (i) {
-                        final item = widget.items[i];
-
-                        return Row(
-                          children: List.generate(widget.clients.length, (j) {
-                            final client = widget.clients[j];
-
-                            // Find the order for this client (handle missing orders)
-                            final matchingOrders = widget.orders.where(
-                              (o) => o.clientId == client.uid,
-                            );
-                            final clientOrder = matchingOrders.isEmpty
-                                ? null
-                                : matchingOrders.first;
-
-                            // Find this item inside the client's order (handle missing items)
-                            ItemsModel? orderItem;
-                            if (clientOrder != null) {
-                              final matchingItems = clientOrder.items.where(
-                                (oi) => oi.uid == item.uid,
-                              );
-                              orderItem = matchingItems.isEmpty
-                                  ? null
-                                  : matchingItems.first;
-                            }
-
-                            final quantity = orderItem?.quantity ?? 0;
-                            final noOfPack = orderItem?.noOfPack ?? 0;
-                            final packType =
-                                orderItem?.packType?.toLowerCase() ?? 'pack';
-                            final cellKey = '${item.uid}_${client.uid}';
-                            final isLoaded =
-                                loadReportState.loadedCells.contains(cellKey);
-
-                            final isEditable = quantity > 0 && isCurrentDate;
-
-                            return Opacity(
-                              opacity:
-                                  (quantity > 0 && !isCurrentDate) ? 0.6 : 1.0,
-                              child: GestureDetector(
-                                onTap: isEditable
-                                    ? () async {
-                                        try {
-                                          await notifier.toggleLoadedStatus(
-                                              item.uid, client.uid);
-                                        } catch (e) {
-                                          // Show error message if API call fails
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                    'Failed to update loaded status: ${e.toString()}'),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      }
-                                    : null,
-                                onLongPress: isEditable && orderItem != null
-                                    ? () {
-                                        _showEditDialog(
-                                          context,
-                                          orderItem!,
-                                          item.uid,
-                                          client.uid,
-                                          notifier,
-                                        );
-                                      }
-                                    : null,
-                                child: Container(
-                                  width: cellWidth,
-                                  height: cellHeight,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: quantity > 0
-                                        ? (isLoaded
-                                            ? Colors.green.shade100
-                                            : (isCurrentDate
-                                                ? Colors.white
-                                                : Colors.grey.shade200))
-                                        : Colors.grey.shade50,
-                                    border: Border.all(
-                                      color: isLoaded && quantity > 0
-                                          ? Colors.green.shade400
-                                          : borderColor,
-                                      width: isLoaded && quantity > 0 ? 2 : 1,
-                                    ),
-                                  ),
-                                  child: quantity > 0
-                                      ? Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              quantity.toString(),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 16,
-                                                color: isLoaded
-                                                    ? Colors.green.shade800
-                                                    : Colors.black87,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              _formatPackText(
-                                                  noOfPack, packType),
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: isLoaded
-                                                    ? Colors.green.shade700
-                                                    : Colors.grey.shade700,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      : Text(
-                                          "-",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey.shade400,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                            );
-                          }),
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
-      ],
+      );
+    }
+
+    // 2. Top Row (Client Headers) - Sticky
+    if (vicinity.row == 0) {
+      final clientIndex = vicinity.column - 1;
+      final client = widget.clients[clientIndex];
+      return TableViewCell(
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            border: Border.all(color: borderColor, width: 1),
+          ),
+          child: Text(
+            client.name,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 3. Left Column (Item Headers) - Sticky
+    if (vicinity.column == 0) {
+      final itemIndex = vicinity.row - 1;
+      final item = widget.items[itemIndex];
+      return TableViewCell(
+        child: Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            border: Border.all(color: borderColor, width: 1),
+          ),
+          child: Text(
+            item.itemName,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 4. Content Cells
+    final itemIndex = vicinity.row - 1;
+    final clientIndex = vicinity.column - 1;
+
+    final item = widget.items[itemIndex];
+    final client = widget.clients[clientIndex];
+
+    // Find the order for this client
+    final matchingOrders = widget.orders.where(
+      (o) => o.clientId == client.uid,
+    );
+    final clientOrder = matchingOrders.isEmpty ? null : matchingOrders.first;
+
+    // Find this item inside the client's order
+    ItemsModel? orderItem;
+    if (clientOrder != null) {
+      final matchingItems = clientOrder.items.where(
+        (oi) => oi.uid == item.uid,
+      );
+      orderItem = matchingItems.isEmpty ? null : matchingItems.first;
+    }
+
+    final quantity = orderItem?.quantity ?? 0;
+    final noOfPack = orderItem?.noOfPack ?? 0;
+    final packType = orderItem?.packType?.toLowerCase() ?? 'pack';
+    final cellKey = '${item.uid}_${client.uid}';
+    final isLoaded = loadReportState.loadedCells.contains(cellKey);
+    final isEditable = quantity > 0 && isCurrentDate;
+
+    return TableViewCell(
+      child: Opacity(
+        opacity: (quantity > 0 && !isCurrentDate) ? 0.6 : 1.0,
+        child: GestureDetector(
+          onTap: isEditable
+              ? () async {
+                  try {
+                    await notifier.toggleLoadedStatus(item.uid, client.uid);
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              'Failed to update loaded status: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                }
+              : null,
+          onLongPress: isEditable && orderItem != null
+              ? () {
+                  _showEditDialog(
+                    context,
+                    orderItem!,
+                    item.uid,
+                    client.uid,
+                    notifier,
+                  );
+                }
+              : null,
+          child: Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: quantity > 0
+                  ? (isLoaded
+                      ? Colors.green.shade100
+                      : (isCurrentDate ? Colors.white : Colors.grey.shade200))
+                  : Colors.grey.shade50,
+              border: Border.all(
+                color: isLoaded && quantity > 0
+                    ? Colors.green.shade400
+                    : borderColor,
+                width: isLoaded && quantity > 0 ? 2 : 1,
+              ),
+            ),
+            child: quantity > 0
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        quantity.toString(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: isLoaded
+                              ? Colors.green.shade800
+                              : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatPackText(noOfPack, packType),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isLoaded
+                              ? Colors.green.shade700
+                              : Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    "-",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+          ),
+        ),
+      ),
     );
   }
 
